@@ -1,4 +1,4 @@
-baseURL = 'http://kpassa.me/'
+baseURL = 'https://kpassa.me/'
 languageCode = 'en-us'
 title = 'kpassa.me'
 theme = 'paper'
