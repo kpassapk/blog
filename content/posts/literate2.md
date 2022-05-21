@@ -4,12 +4,19 @@ date: 2022-05-15T17:37:47-05:00
 draft: true
 ---
 
+In the last [post]({{< ref "literate1.md" >}}), we looked at an extension
+for Visual Studio Code called "Rest Client". We tlaked a bit about the benefits
+to taking a "literate" approach to exploring APIs, where your interactions are 
+recorded in a text file with a simple format which you can share with colleagues
+and is readable without any special tools. In this article, we will look at some
+tools for Emacs.
+
 ## Org-mode
 
-Next to Donald Knuth, Dominic Carsten should go down in history as one of the
-greatest yak-shavers of all time. Starting as a note taker, Org mode is used for
-agendas and GTD systems, writing Ph.D theses, and publishing blogs like this
-one.
+Next to Donald Knuth with LaTeX, Dominic Carsten should go down in history as
+one of the greatest yak-shavers of all time. Starting as a note taker, Org mode
+is today used for agendas and GTD systems, writing Ph.D theses, and publishing
+blogs like this one.
 
 Superficially, Org mode is an outline system alla Markdown:
 
@@ -21,12 +28,21 @@ Superficially, Org mode is an outline system alla Markdown:
 ```
 
 You have markup for font styles like bold and italic, formatted code snippets,
-and can export to HTML. So far a lot like Markdown.
+and can export to HTML. In Markdown, if you want to do anything more, you will
+need to select a dialect (commonly known as a flavor) and tools which understand
+that dialect. New features are added now and then, but are not compatible across
+flavors. For instance, Github just released [math][github-math] equation support
+to their Markdown [flavor][ghmarkdown].
 
-The differences start showing up editing code blocks. In Markdown, syntax for
-code blocks is fairly basic. Some Markdown additions exist which take it a lot
-futher, such as [a] and [b], but they have more limited use. A source code block
-looks like this:
+Org Mode lacks a specification as such, and its extremely rich feature set is
+backed up by its one true reference implementation: 22,000 lines of Emacs lisp
+(plus extensions). That Markdown feature just launched by Github? It's been in
+Org Mode for about [15 years][orgmath].
+
+Org mode is one of the more viable solutions for doing literate programming, where
+code exists inside prose, rather than prose being inside the code as comments.
+
+Code snippets in Org Mode are written like this:
 
 ```
 
@@ -36,10 +52,7 @@ looks like this:
 
 ```
 
-It is one of the more viable solutions for doing literate programming, where
-code exists inside prose, rather than prose being inside the code as comments.
-
-Here's a short snippet that shows how it works:
+They can pass values between them, like in this example:
 
 ```
 
@@ -51,14 +64,12 @@ Here's a short snippet that shows how it works:
  #+BEGIN_SRC sh :stdin hi
  cowsay
  #+END_SRC
-
 ```
 
 We have two source code blocks, and one is getting the otuput from the other.
 They are both running shell scripts. When we run them, we see this:
 
 ```
-
 #+NAME: hi
 #+BEGIN_SRC sh
 echo "hi"
@@ -89,7 +100,8 @@ hope.
 
 ## Restclient
 
-The same cURL call that took 2 steps, in restclient [link] for Emacs, looks like this:
+The same RFC 2616] client syntax can be used in Emacs [restclient][restclient]
+by embedding it in a block with language `restclient`.
 
 ```
 #+NAME: restclient
@@ -111,24 +123,9 @@ Content-Type: application/json
 
 ```
 
-
-That's the first source code block. REST client uses a shortened description of
-the call that turns out to be an actual RFC [link]. In this printed version
-(which was just generated from the Emacs source) you won't see the header line
-demarcating the source block. It identifies the block as being of "restclient"
-type:
-
-```
-#+begin_example
- #+begin_src restclient :results value
- ...
-#+end_example
-```
-
 Following the org example above, we will introduce a second code block, which
-reads the output of the first, and manipulates it: (Similar to where we had
-=cowsay= in the previous example.)
-
+reads the output of the first, and manipulates it. We will use both bash and
+Python, thanks to the [babel][org-babel] extension, built into Emacs.
 
 ```
 #+begin_src sh :stdin restclient :wrap src json
@@ -139,18 +136,12 @@ jq '.'
 #+begin_src json
 {
   "args": {},
-  "data": "{\n    \"jql\": \"project = HSP\",\n    \"startAt\": 0,\n    \"maxResults\": 15,\n    \"fields\": [\n        \"summary\",\n        \"status\",\n        \"assignee\"\n    ]\n}",
+  "data": "{\n    \"jql\": \"project = HSP\",\n   ... }"
   "files": {},
   "form": {},
   "headers": {
     "Accept": "*/*",
-    "Accept-Encoding": "gzip",
-    "Content-Length": "149",
-    "Content-Type": "application/json",
-    "Extension": "Security/Digest Security/SSL",
-    "Host": "httpbin.org",
-    "Mime-Version": "1.0",
-    "X-Amzn-Trace-Id": "Root=1-60d12829-4c670c4707294e1e1cce5439"
+    ...
   },
   "json": {
     "fields": [
@@ -169,9 +160,9 @@ jq '.'
 
 ```
 
-This is =jq=, in this example just printing the output. Now let's write another
-=jq= block, this time extracting the contents of the =data= entry, which
-containins the original payload:
+This block uses [jq][jq] to pretty print the output. Now let's write another
+`jq` block, this time extracting the contents of the `data` entry, which
+containins the original payload.
 
 ```
 #+NAME: json-doc
@@ -220,40 +211,40 @@ print(json.dumps(data, indent=4))
 ```
 
 It may not be obvious reading this how automated this actually is. The code
-snippets and . None of the output blocks have been manually edited, they can all
-be regenerated from the input, like in a Jupyter notebook. One difference
-between this format and the iPython format is that there isn't really a content
-vs. container format. It's all in a big text file with some markup that still
-looks OK when you read it in plain text.
+snippets are executable at a keystroke for either the shell-based `jq` or
+Python. 
+
+The data science community has been developing multi-language versions for years
+that can do much the same thing. Unlike data science notebooks, here we never
+leave the editor, and there is no content vs. container format distinction. It's
+all in a big text file with some markup that still looks OK when you read it in
+plain text.
 
 If you were to load it in Org mode, you would see nice syntax highting for the
 code in the blocks, and be able to jump into each snippet in a separate window
-to edit with indentation, linting, and documentation.
+to edit with indentation, linting, and documentation. You can even use
+[LSP][org-lsp] in the fragments to gain sophisticated static analysis
+capabilities. If you don't, there is improving support in [other][org-vim]
+[editors][org-vscode].
 
-The whole thing is completely tied into Emacs: the way it looks, the way it
-evaluates, etc. There are some Org mode implementations for other editors like
-VI and Visual Studio Code, but they typically handle a fraction of the API,
-which is quite extensive. There's no context switch between the editor and the
-document, or between the document the embeddd code snippets. If you invest time
-to get it to work, its rewards are many.
-
-If you are interested in looking at the soure of this article to see how the
-entire thing was laid out, click here. Turns out github understands Org mode
-just fine.
+To get the most of it, though, you have to embrace that this thing is completely
+tied into Emacs. There's no context switch between the editor and the document,
+or between the document the embeddd code snippets. If you invest time to get it
+to work, the rewards are many. I use [doom emacs][doom] almost out of the box.
 
 # Caching
 
 Let's keep going with something that would have made the cURL or Postman
 workflow really strain. We will make requests against an API that returns a
-large response. (Large as in lines of text, not as in MB.)
+large response. We'll use the Pokemon API as an example.
 
 With such a large payload, we want to see if we can capture it once, and then
 slice and dice it several ways. This is done by enabling caching. The resulting
 header will be like this:
 
-#+begin_example
+```
 #+begin_src restclient :results value drawer :cache yes
-#+end_example
+```
 
 We're going to want to use this cache in later steps. A footnote here: first,
 the drawer gets in the way of the results parsing. This can be overcome through
@@ -266,10 +257,11 @@ notes section, along with the workaround.)
 GET https://pokeapi.co/api/v2/pokemon-species/25/
 Accept: application/json
 #+end_src
+```
 
 The top of the results drawer looks like this:
+```
 
-#+begin_example
  :results:
  #+RESULTS[af90d0f88686fd6432b6b25e0f7764fad2413481]: pokemon-cached
  {
@@ -280,7 +272,6 @@ The top of the results drawer looks like this:
      "url": "https://pokeapi.co/api/v2/pokemon-color/10/"
    },
    ... ~ 4,000 more lines ...
-#+end_example
 
 ```
 
@@ -290,7 +281,7 @@ But when I collapse it with Emacs, it's unintrusive:
 [[attachment:_20210621_195727screenshot.png]]
 
 It's gone from line 192 to line 4246. That's a pretty big JSON payload.
-How big?
+How big exactly?
 
 ```
 #+begin_src sh :stdin pokemon-cached :results output
@@ -301,20 +292,20 @@ wc
 :     4051   10049  133247
 ```
 
-Pretty hard to grok the overall structure and contents.
+4051 lines. This last command should have executed instantly, since it's
+working off a cached response from the REST call. It only had to 
 
-#+NAME: pokemon
-#+begin_src restclient  :results value drawer :cache yes :exports none
-GET https://pokeapi.co/api/v2/pokemon-species/25/
-Accept: application/json
-#+end_src
+It's pretty hard to grok the overall structure and contents, though, so let's
+use `jq` again.
 
-Now let's have a look at the keys:
-
+```
 #+begin_src sh :stdin pokemon :wrap src json
 jq 'keys'
 #+end_src
+```
 
+
+```
 #+RESULTS:
 #+begin_src json
 [
@@ -347,6 +338,7 @@ jq 'keys'
   "varieties"
 ]
 #+end_src
+```
 
 This API has some scalars like =name=, and some lists like =names=:
 
@@ -696,10 +688,18 @@ working ont hese exercises.
 
 I hope this article gave you a taster of what is possible if you choose to brave
 the world of many parens. and having that "fits-like-a-glove environment."
-* References
 
-restclient: https://github.com/pashky/restclient.el
-org-babel: https://orgmode.org/worg/org-contrib/babel/
-elisp-cookbook: https://www.emacswiki.org/emacs/ElispCookbook
-auth0 examples: https://auth0.com/docs/connections/generic-oauth2-connection-examples
-ceo-emacs: https://www.fugue.co/blog/2015-11-11-guide-to-emacs.html
+[ghmarkdown]: https://github.github.com/gfm/
+[org-latex]: https://orgmode.org/manual/LaTeX-fragments.html
+[github-math]: https://github.blog/2022-05-19-math-support-in-markdown/
+[orgmath]: https://orgmode.org/manual/LaTeX-math-snippets.html
+[jq]: https://stedolan.github.io/jq/
+[restclient]: https://github.com/pashky/restclient.el
+[org-babel]: https://orgmode.org/worg/org-contrib/babel/
+[elisp-cookbook]: https://www.emacswiki.org/emacs/ElispCookbook
+[auth0 examples]: https://auth0.com/docs/connections/generic-oauth2-connection-examples
+[ceo-emacs]: https://www.fugue.co/blog/2015-11-11-guide-to-emacs.html
+[org-lsp]: https://emacs-lsp.github.io/lsp-mode/manual-language-docs/lsp-org/
+[org-vscode]: get https://github.com/vscode-org-mode/vscode-org-mode
+[org-vim]: https://github.com/jceb/vim-orgmode/blob/master/CHANGELOG.org
+[doom]: https://github.com/doomemacs/doomemacs
