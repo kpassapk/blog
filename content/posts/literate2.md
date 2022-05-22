@@ -4,19 +4,17 @@ date: 2022-05-15T17:37:47-05:00
 draft: false
 ---
 
-In the last [post]({{< ref "literate1.md" >}}), we looked at an extension
-for Visual Studio Code called "Rest Client". We tlaked a bit about the benefits
-to taking a "literate" approach to exploring APIs, where your interactions are 
-recorded in a text file with a simple format which you can share with colleagues
-and is readable without any special tools. In this article, we will look at some
-tools for Emacs that achieve this and more.
+In the last [post]({{< ref "literate1.md" >}}), we looked at the Rest Client
+extension for VS Code. We tlaked a bit about the benefits to taking a "literate"
+approach to exploring APIs, where your interactions are recorded in a text file
+with a simple format which you can share with colleagues and is readable without
+any special tools. In this article, we will look at some tools for Emacs that
+achieve this and more.
 
 ## Org-mode
 
-Next to Donald Knuth with LaTeX, Dominic Carsten should go down as one of the
-greatest yak-shavers of all time. Starting as a note taker, [Org mode][org] is
-today used for agendas and GTD systems, writing Ph.D theses, and publishing
-blogs like this one.
+tarting as a note taker, [Org mode][org] is today used for agendas and GTD
+systems, writing Ph.D theses, and publishing blogs like this one.
 
 Superficially, Org mode is an outline system alla Markdown:
 
@@ -380,9 +378,11 @@ it removes leading and trailing whitespace. More in the notes section.
 The `save-login` function gets a token and saves it in a "header argument" with
 this format:
 
+```
 #+begin_example
  :header-args+: :var token="3af41..."
 #+end_example
+```
 
 If you're not into Emacs (yet), the details won't make much sense. Let's just
 say that this header argument is what will let you recall the token later on.
@@ -497,7 +497,8 @@ the APIs.
 [org-babel]: https://orgmode.org/worg/org-contrib/babel/
 [elisp-cookbook]: https://www.emacswiki.org/emacs/ElispCookbook
 [org-lsp]: https://emacs-lsp.github.io/lsp-mode/manual-language-docs/lsp-org/
-[org-vscode]: get https://github.com/vscode-org-mode/vscode-org-mode
+[org-vscode]: https://github.com/vscode-org-mode/vscode-org-mode
 [org-vim]: https://github.com/jceb/vim-orgmode/blob/master/CHANGELOG.org
 [doom]: https://github.com/doomemacs/doomemacs
 [ox-hugo]: https://ox-hugo.scripter.co/
+
