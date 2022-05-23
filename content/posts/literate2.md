@@ -13,7 +13,7 @@ achieve this and more.
 
 ## Org-mode
 
-tarting as a note taker, [Org mode][org] is today used for agendas and GTD
+Starting as a note taker, [Org mode][org] is today used for agendas and GTD
 systems, writing Ph.D theses, and publishing blogs like this one.
 
 Superficially, Org mode is an outline system alla Markdown:
@@ -114,6 +114,7 @@ Content-Type: application/json
 }
 #+end_src
 ```
+> *NB: The request body in this example is made up.*
 
 Now let's introduce a second code block, which reads the output of the first,
 and manipulates it. We will use both bash and Python, thanks to the
@@ -352,8 +353,8 @@ prints the current heading.
 : Emacs Lisp
 ```
 
-Let's use this technique to run the multiAPI call with two steps. Here's what
-we'll do:
+Let's use this technique to run the [example]({{< ref "literate1.md#example" >}}) 
+call from the previous post.
 
 Fist, we'll write a cURL command which does basic authentication against an API
 and returns a token. Then we'll use elisp to store that token in a hidden field
@@ -371,9 +372,9 @@ This is the elisp to save the login to a header argument. This is the
 #+end_src
 ```
 
-We will explain how to get the =token= variable in a bit. The "chomp" function
+We will explain how to get the `token` variable in a bit. The "chomp" function
 is from the [Emacs lisp cookbook][elisp-cookbook]. Similar to the one in Perl,
-it removes leading and trailing whitespace. More in the notes section.
+it removes leading and trailing whitespace.
 
 The `save-login` function gets a token and saves it in a "header argument" with
 this format:

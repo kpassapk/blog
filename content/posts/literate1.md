@@ -68,7 +68,7 @@ contrived but common scenarios:
 Let's set up a typical task using cURL commands. Then we'll bring the same
 commands into VS Code, and combine them with other markup.
 
-## Example task: login
+## Example task: login {#example}
 
 To do anything useful with an API, you need to log on and then send a request.
 In a typical scenario, this consist of the following two steps: [^1]
