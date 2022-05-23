@@ -8,7 +8,7 @@ In the last [post]({{< ref "literate1.md" >}}), we looked at the Rest Client
 extension for VS Code. We started taking a "literate" approach to exploring
 APIs, where our interactions are recorded in a text file with a simple format
 which can be shared with colleagues and is readable without any special tools.
-In this article, we will look at some tools for Emacs that achieve this and
+In this article, we will look at some Emacs features that achieve this and
 more.
 
 ## Org-mode
@@ -355,16 +355,15 @@ prints the current heading.
 : Emacs Lisp
 ```
 
-Let's use this technique to run the [example]({{< ref "literate1.md#example" >}}) 
+We can use this technique to run the [example]({{< ref "literate1.md#example" >}}) 
 call from the previous post.
 
-Fist, we'll write a cURL command which does basic authentication against an API
+First, we'll write a cURL command which does basic authentication against an API
 and returns a token. Then we'll use elisp to store that token in a hidden field
 in the document. Then in a second call, we will use the stored token and
 send it using restclient to another API.
 
-This is the elisp to save the login to a header argument. This is the
-`save-login` function:
+This is the `save-login` function, which saves the login to a header argument:
 
 ```
 #+NAME: save-login
