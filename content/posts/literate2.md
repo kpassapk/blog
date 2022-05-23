@@ -5,11 +5,11 @@ draft: false
 ---
 
 In the last [post]({{< ref "literate1.md" >}}), we looked at the Rest Client
-extension for VS Code. We tlaked a bit about the benefits to taking a "literate"
-approach to exploring APIs, where your interactions are recorded in a text file
-with a simple format which you can share with colleagues and is readable without
-any special tools. In this article, we will look at some tools for Emacs that
-achieve this and more.
+extension for VS Code. We started taking a "literate" approach to exploring
+APIs, where our interactions are recorded in a text file with a simple format
+which can be shared with colleagues and is readable without any special tools.
+In this article, we will look at some tools for Emacs that achieve this and
+more.
 
 ## Org-mode
 
@@ -61,7 +61,7 @@ They can pass values between them, like in this example:
  #+END_SRC
 ```
 
-We have two source code blocks, and one is getting the otuput from the other.
+We have two source code blocks, and one is getting the output from the other.
 They are both running shell scripts. When we run them, we see this:
 
 ```
@@ -93,7 +93,7 @@ time.
 
 ## Restclient
 
-The same RFC 2616] client syntax can be used in Emacs [restclient][restclient]
+RFC 2616 client syntax can be used in Emacs [restclient][restclient]
 by embedding it in a block with language `restclient`.
 
 ```
@@ -154,7 +154,7 @@ jq '.'
 
 This block uses [jq][jq] to pretty print the output. Now let's write another
 `jq` block, this time extracting the contents of the `data` entry, which
-containins the original payload.
+contains the original payload.
 
 ```
 #+NAME: json-doc
@@ -212,9 +212,9 @@ leave the editor, and there is no content vs. container format distinction. It's
 all in a text file with some markup that still looks OK when you read it in
 plain text.
 
-If you were to load it in Org mode, you would see nice syntax highting for the
-code in the blocks, and be able to jump into each snippet in a separate window
-to edit with syntax checking and linting support. You can even use
+If you were to load it in Org mode, you would see nice syntax highlighting for
+the code in the blocks, and be able to jump into each snippet in a separate
+window to edit with syntax checking and linting support. You can even use
 [LSP][org-lsp] in the fragments to gain sophisticated static analysis
 capabilities. If you don't, there is improving support in [other][org-vim]
 [editors][org-vscode].
@@ -307,7 +307,7 @@ jq '.names[0]'
 : }
 ```
 
-This is telling us what Pikachu is called in a few different languates. We can
+This is telling us what Pikachu is called in a few different languages. We can
 get a results table by passing the results stream through the `@csv` filter:
 
 ```
@@ -334,7 +334,9 @@ jq -r '.names[] | [.name, (.language | .name, .url)] | @csv'
 ```
 
 The resulting table could be further processed by a Python source code block, or
-output to a file.
+output to a file. Once you have a few things down about the shape of the data,
+you would probably want to remove the cached response from your document and
+removed the `:cache yes` option.
 
 # Emacs Lisp
 
@@ -366,7 +368,6 @@ This is the elisp to save the login to a header argument. This is the
 
 ```
 #+NAME: save-login
-#+CAPTION: save-login function
 #+begin_src elisp
 (org-set-property "header-args+" (concat ":var token=" (json-encode (chomp token))))
 #+end_src
@@ -426,7 +427,7 @@ Now we call our `save-login` function.
 #+end_src
 ```
 
-The header argument of the notebook now contians a property.
+The header argument of the notebook now contains a property.
 
 ```
 #+begin_example
@@ -460,7 +461,7 @@ Authorization: Bearer :token
 Since the `token` was in the `header-args` list, it could be used from the source block without 
 having to require it explicitly.
 
-I find I use this approach a lot to reember the authentication credentials for
+I find I use this approach a lot to remember the authentication credentials for
 an API, and having the credentials available to every code block in the
 document.
 
