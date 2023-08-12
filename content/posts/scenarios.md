@@ -11,6 +11,7 @@ Unit testing is key to the overall reliability of a system.
 
 The importance of near 100% test coverage.
 
+
 With pure functions, this is fairly straightforward: provide a series of inputs, and then test the outputs.
 
 However, object-based test code will typically reuqire some setup. The object of the class (equivalent to the receiver in go) needs to be initialized somehow, and there may be various ways of doing this.
@@ -164,9 +165,11 @@ We would like to write a test like this:
 
 This will scale up better with more complex tests, and is more friendly to newcomers.
 
+Where they make sense is when the code is structured such that there is a struct with a primary method that does some work plus a number of secondary methods that assist in that primary method or which set up the struct prior to executing it.  That is a very common pattern and a semantic test works well for setting up an instance of the struct prior to executing the primary method and then validating the terminal conditions of all mocks and members of the struct. It could be argued that a semantic test is a useful way to package up tests of any struct that has methods. But code that is entirely functional often would be fairly awkward to test via a semantic test.
+
 ## Generic tester class
 
-To achieve this, let's define a generic Tester class. 
+To achieve the advantages of semantic tests without the 10x cost, let's define a generic Tester class. 
 
 For struct receivers, it will have a few helper functions for us to write down a scenario. The `FieldsType` contains the struct fields for the receiver; `ArgsType` defines the data type for each argument to the function under test; `ResponseType` is what the function returns.
 
