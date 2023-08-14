@@ -282,11 +282,12 @@ is due to bad test code, or bad program code. If we have time pressure in
 developing a new API, it will take us so long to write test code that we may
 sacrifice overall veocity.
 
-We would normally swtich to Postman or a similar tool to use the API and look at
-API. We have to switch to the program and switch context to understanding what is
-being sent out; then switch back to the IDE. This context switch is expensive,
-compared with the usual debugging cycle. Postman does have automation, but it's
-in Javascript. We already have a very full-featured langauge in Go.
+We would normally swtich to Postman or a similar tool to use the API and save a
+few responses for later. We have to switch to the program and switch context to
+understanding what is being sent out; then switch back to the IDE. This context
+switch is expensive, compared with the usual debugging cycle. Postman does have
+automation, but it's in Javascript. We already have a very full-featured
+langauge in Go.
 
 Using any external tool to exercise our API endpoints will leave almost no paper
 trail behind. We will end up with separate program code and Postman collections
