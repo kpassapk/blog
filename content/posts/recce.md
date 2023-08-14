@@ -33,7 +33,7 @@ time to make your application more robust.
 
 If this sounds good, then read on! Code below is in Go, but should be easily
 replicable in any language. You can also jump straight to
-[the code](https://github.com/kpassapk/reccie) on Github.
+[the code](https://github.com/kpassapk/recce) on Github.
 
 ## REST(less)
 
@@ -79,7 +79,7 @@ kind of like documentation, if you squinted a bit. They were meant to be
 machine-readable, but often I would find myself looking at versioned recordings
 on Github. The format was a bit strange, but you could see requests and response
 codes, bodies, headers and the like, all in one place. The Ruby tool spawned a bunch
-of [variants](govcr) in [other][vcrpy] [languages][betamax], which I suppose testifies to the genral
+of [variants](govcr) in [other][vcrpy] [languages][betamax], which testifies to the genral
 usefulness of this pattern.
 
 Over time, recordings of our own APIs became a kind of ad hoc - but effective - documentation set.
@@ -88,14 +88,17 @@ Over time, recordings of our own APIs became a kind of ad hoc - but effective - 
 [vcrpy]: https://vcrpy.readthedocs.io/en/latest/usage.html
 [betamax]: https://github.com/betamaxteam/betamax
 
-In Go, things are a bit different. Not only is monkey-patching frowned upon /
-not even possible, but testing is more pure in terms of how you are supposed to
-do it: use the same handler functions in your test and in your program, and do
-all testing internal to your process. Much preferable and way faster to run, in
-wall-clock seconds. But part of is left wanting good old VCR when I am still
-feeling things out. I for sure miss the versioned recording files.
+Coming to Go, things felt a bit more strict. Not only is monkey-patching frowned
+upon / not even possible, but testing is more pure in terms of how you are
+supposed to do it: use the same handler functions in your test and in your
+program, and do all testing internal to your process. Much preferable and way
+faster to run, in wall-clock seconds. But part of was left wanting good old VCR
+when I was still feeling things out. I for sure missed the versioned recording
+files.
 
-One happy discovery has been the VS Code [REST client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) as an alternative to Postman and cURL. It uses a format like this:
+Along the way I made one fortunate discovery: VS Code [REST
+client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
+as an alternative to Postman and cURL. It uses a format like this:
 
 ```
 POST /api
@@ -115,7 +118,10 @@ supposed to be all about!
 [restvim]: restclient.vim
 [intellij]: https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html
 
-In this post we're putting together: 
+It should be easy to record tests in Go, I thought - and why not save in a
+sorta standard format that can be immediately re-run? 
+
+Let's put this together bit by bit:
 1. Nice standard tests in Golang
 2. ... that save test files as they run
 3. ... in REST client format
@@ -378,7 +384,7 @@ recordings
 We will store files using the noun (tasks), then one directory for each verb,
 and then example files. Let's define "group" to be`tasks/create`, `tasks/update`
 and so on. Each group will have many examples. Add the group to the tester
-struct, as well as a test case number to name the example files and a hostname
+struct, as well as a test case number and name, and a hostname
 to write in the test files.
 
 ```
@@ -387,6 +393,7 @@ type tester struct {
     tc int
     host string
     ...
+}
 ```
 
 Now let's write the function to write out or example file to disk.
@@ -430,9 +437,10 @@ func (s *tester) createTestFile() error {
 
 The `errors.Wrap` command is from
 [github.com/pkg/errors](https://github.com/pkg/errors), and provides stack
-traces and slightly improved semantics for dealing with error chains. The
-`prettyPrintRequest()` command will write out the `*http.Request` in a format
-understandable by the text-based REST clients.
+traces and slightly improved semantics for dealing with error chains. 
+
+The `prettyPrintRequest()` command will write out the `*http.Request` in a format
+understandable by the text-based REST clients:
 
 
 ```
@@ -564,10 +572,10 @@ documentation is built.
 
 ## Recce
 
-These ideas have gone into [reccie][reccie], in case it may be useful to
+These ideas have gone into [recce][recce], in case it may be useful to
 somebody. It's a super early version right now. Comments welcome.
 
-[reccie]: https://github.com/kpassapk/reccie
+[recce]: https://github.com/kpassapk/recce
 
 Since a copy of the request and response is kept in memory, this library will be
 performant only with small requests and responses. Most of the time, this will not
