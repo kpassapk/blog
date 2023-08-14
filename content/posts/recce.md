@@ -9,7 +9,7 @@ date: 2023-08-13T19:30:00-05:00
 [-> github](https://github.com/kpassapk/recce)
 
 You're hard at work when a new task comes in: you have to whip up a new REST API and
-hash out the contract ASAP for the latest product feature. You decide to take it.
+hash out the contract ASAP for the latest product feature. You start right away.
 
 Now what? You track down consumers and lay out an initial deisign. You stand up
 an early version of the endpoints, try to guard against incorrect input, and provide
@@ -218,7 +218,7 @@ It's a start! Now let's write a test for it.
 
 ## Testing the "Create" endpoint
 
-A table-driven test for the "create " endpoint might look like
+A table-driven test for the "create " endpoint might look like this:
 
 ```go
 func TestCreateTask(t *testing.T) {
@@ -286,7 +286,7 @@ We would normally swtich to Postman or a similar tool to use the API and look at
 API. We have to switch to the program and switch context to understanding what is
 being sent out; then switch back to the IDE. This context switch is expensive,
 compared with the usual debugging cycle. Postman does have automation, but it's
-in Javascript. We already have very full-featured langauge in Go.
+in Javascript. We already have a very full-featured langauge in Go.
 
 Using any external tool to exercise our API endpoints will leave almost no paper
 trail behind. We will end up with separate program code and Postman collections
