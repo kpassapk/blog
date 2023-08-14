@@ -6,6 +6,8 @@ date: 2023-08-13T19:30:00-05:00
 *Recce (ReKi)* **[V]**: to visit [a] place in order to become familiar with it.
 - Collins
 
+[-> github](https://github.com/kpassapk/recce)
+
 You're hard at work when a new task comes in: you have to whip up a new REST API and
 hash out the contract ASAP for the latest product feature. You decide to take it.
 
