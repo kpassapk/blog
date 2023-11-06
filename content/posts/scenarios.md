@@ -3,8 +3,6 @@ title: Optimizing Go Tests for Readability
 date: 2023-11-05T20:00:00-05:00
 ---
 
-# Optimizing Go Tests for Readability
-
 Software developers spend much more time reading code than writing code. By
 various accounts, time deciphering and analyzing code exceeds time writing by at
 lest 5x - and it could be as much as 20x.
