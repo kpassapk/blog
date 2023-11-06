@@ -41,7 +41,7 @@ Object-based test code will require more setup. The object of the class
 (equivalent to the receiver in go) needs to be initialized somehow. Each of the
 object's collaborators may have varied state. Doing this setup compactly is key
 to successful testing of object-based code. (See this [great
-talk][https://youtu.be/Iel4vVYgExA?si=cVbGO0SU8lKoueyG] for more on test setup.)
+talk](https://youtu.be/Iel4vVYgExA?si=cVbGO0SU8lKoueyG) for more on test setup.)
 
 The Go community uses table-driven testing heavily to keep tests concise. This
 pattern is particularly great for simple functions. For functions with complex
