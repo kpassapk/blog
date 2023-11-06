@@ -391,7 +391,7 @@ func TestGreeter_Hello(t *testing.T) {
 			args{
 				name: "Yao",
 			},
-			func(s *greeterTester[args, string]) {
+			func(s *tester) {
 				s.givenFields(fields{lang: "EN"})
 				s.when(hello)
 				s.assertNoError()
@@ -414,6 +414,9 @@ func TestGreeter_Hello(t *testing.T) {
 The table now contains 3 elements only: `name`, `args`, and `scenario`. This can be
 the same for every test in the company codebase, so the reader can just scan this 
 quickly and get right to the setup functions.
+
+The tester `greeterTester` at package level and reused for all the greeter's functions.
+(They will share the same struct fields.)
 
 By implementing new `given...` methods on the tester, we can abstract away any complex
 setup of the receiver, should it be necessary. The assertions are easy to read, and can
