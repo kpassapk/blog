@@ -108,7 +108,7 @@ func (g greeter) Goodbye() (string, error) {
 
 ## Table-driven tests
 
-In a [table-driven][tabledriven]] test, each table entry is a complete test case
+In a [table-driven][tabledriven] test, each table entry is a complete test case
 with inputs and expected results, and sometimes with additional information such
 as a test name to make the test output easily readable. This can help reduce
 test duplication, so that every variant being tested is presented as a line in
@@ -364,9 +364,9 @@ t.assertNoError()
 t.assertResultIs("hi, Yao")
 ```
 
-## Table-driven test
+## Table-driven test, revisited
 
-Now let's put it in a table driven test. 
+Now let's put it in a table-driven, *scenario-driven* test. 
 
 ```go
 func TestGreeter_Hello(t *testing.T) {
