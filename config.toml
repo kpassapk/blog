@@ -9,3 +9,7 @@ theme = 'paper'
     instagram = "kpassapk"
     mastodon = "https://techhub.social/@kpassapk"
     rss = true
+
+    avatar = 'kyle.passarelli@gmail.com'
+    name = 'Kyle Passarelli'
+    bio = 'Engineering @ yalo'
