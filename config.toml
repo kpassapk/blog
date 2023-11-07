@@ -7,4 +7,5 @@ theme = 'paper'
     twitter = "kpassapk"
     github = "kpassapk"
     instagram = "kpassapk"
-
+    mastodon = "https://techhub.social/@kpassapk"
+    rss = true
