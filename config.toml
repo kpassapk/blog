@@ -13,3 +13,13 @@ theme = 'paper'
     avatar = 'kyle.passarelli@gmail.com'
     name = 'Kyle Passarelli'
     bio = 'Engineering @ yalo'
+
+  # giscus
+[params.giscus]
+  repo = 'kpassapk/blog'                 # see https://giscus.app for more details
+  repoId = '492531109'
+  category = 'Q&A'
+  categoryId = 'DIC_kwDOHVttpc4CaxV_'
+  mapping = 'pathname'
+  theme = 'light'
+  lang = 'en-US'
