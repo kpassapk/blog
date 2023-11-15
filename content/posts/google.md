@@ -4,15 +4,16 @@ date: 2023-11-14T20:00:00-05:00
 ---
 
 I've had a sneaking suspicion for a whle that OKRs - as in Objectives and Key
-Results - are in fact clever device deployed by Google to throw startups off
+Results - are in fact clever device deployed by Google [^1] to throw startups off
 track.
+
+[^1]: OKRs were developed at Intel, but I learned about them from Google Ventures, so I'll blame Google for evangelizing.
 
 The appeal of OKRs is in their perceived simplicity: any problem large, or
 small, organizational or technical, made solvable by careful setting of O's and
-KR's.*
+KR's.[^2]
 
-(* Just remember to cascade your KRs and figure out if you want 0.7 attainment
-or more. And never tak about outputs, only outcomes.)
+[^2]: Just remember to cascade your KRs and figure out if you want 0.7 attainment or more. And never tak about outputs, only outcomes.
 
 It never plays out as promised: a few cycles deep into OKRs will leave
 startups wondering why they're so dumb they can't implement what seems like a
