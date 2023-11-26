@@ -5,17 +5,17 @@ date: 2023-11-05T20:00:00-05:00
 
 Software developers spend much more time reading code than writing code. By
 various accounts, time deciphering and analyzing code exceeds time writing by at
-lest 5x - and it could be as much as 20x.
+least 5x - and it could be as much as 20x.
 
-This measure is compounded when a new developer is brought onto an existing
+Time writing is increased when a new developer is brought onto an existing
 codebase, looking to adapt it to a new business requirement. Before a single
-line of code is altered, they are going to be doing a lot of reading to zero in
-on the place to make the change.
+line of code is altered, the developer is going to be doing a lot of reading to
+zero in on where to make the change.
 
 A well-structured suite of unit and integration tests becomes an invaluable
 asset in this context. If the tests are readable, the new developer can start by
 reading the tests, then go to the code being tested. Tests can tremendously aid
-the readability of the system. But they can also hinder it: in typical
+the readability of the system. But they can also hinder it. In typical
 Object-Oriented (OO) code, they are obscured by lengthy test setup, or can be
 too low-level to be understood quickly.
 
@@ -165,7 +165,7 @@ error was not desired but was obtained.
 
 A good thing about its code is that all the logic is in one place. To add an
 additional test case, it is enough to add a row with the additional data
-structures. Error messages are consistent across tets, and it is relatively easy
+structures. Error messages are consistent across tests, and it is relatively easy
 easy to see what is going on.
 
 Let's add a few tests to the table. Here we will test the English and
