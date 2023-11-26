@@ -15,7 +15,7 @@ KR's.[^2]
 
 [^2]: Just remember to cascade your KRs and figure out if you want 0.7 attainment or more. And never tak about outputs, only outcomes.
 
-It never plays out as promised: a few cycles deep into OKRs will leave
+It never plays out as promised. A few cycles deep into OKRs will leave
 startups wondering why they're so dumb they can't implement what seems like a
 pretty simple system.
 
@@ -24,7 +24,7 @@ them least. We already have a bunch of good terms to talk about problem solving
 in this domain, after all: a _roadmap_ expresses the "what"; _agile_ is the
 "how".
 
-Stay cynical with me for a just a second longer: what if OKRs are in fact a subtle
+Stay cynical with me for a just a second longer. What if OKRs are in fact a subtle
 and careful ploy to keep startups off balance? Always failing because they are
 trying to do too much; always feeling bad they can't actually be like the big-G?
 GG, Google, gotta hand it to you.
@@ -57,7 +57,7 @@ To succeed here, the company needed to achieve "embarrassingly parallel" by
 networking a large number of machines.
 
 Pretty soon the company figured out ads were the thing. Out came more shiny tech
-and more white papers: Fast forward to Spanner, which handles all of this with
+and more white papers. Fast forward to Spanner, which handles all of this with
 ["no compromises"](https://cloud.google.com/spanner?hl=en). Custom-built
 networking gear, atomic clocks, and masses of undersea fiber-optic cable work
 together to loosen up the CAP theorem enough for the "no compromises" claim to
