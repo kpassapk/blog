@@ -1,7 +1,7 @@
 ---
 title: What color is your auth? OAuth2 with Clojure and Temporal
 date: 2024-09-15T20:00:00-05:00
-draft: true
+draft: false
 ---
 
 Oauth2 has become the dominant authentication mechanism for Web APIs. It is more secure than than
