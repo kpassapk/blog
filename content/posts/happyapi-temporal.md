@@ -13,7 +13,7 @@ The trend is likely to continue as second authentication factors, passkeys or bi
 improtant.
 
 OAuth2 is simple in principle, but a bit tricky to implement. This is because its main
-authentication flow, called the authorization code grant flow, is callback-driven. This makes it
+authentication flow, called the authorization code flow, is callback-driven. This makes it
 hard to write scripts or applications that run in the background; in web apps which do have HTTP
 handlers that can handle callbacks, it can result in poor separation of concerns and brittle code.
 
@@ -70,7 +70,7 @@ talking about UI concerns.
 The steps in the Oauth2 [authorization code grant][auth-code] involves a resource owner, an
 authorization server, and an application, as shown in the image below.
 
-[auth-seq](images/authcode.webp)
+![auth-seq](authcode.webp)
 
 [auth-code]: https://datatracker.ietf.org/doc/html/rfc6749#section-1.3.1
 
@@ -92,7 +92,7 @@ valid, and refreshes it otherise.
 we want to create an application that allows the user to log in to Google with enough access scope
 to show the contents of a Google Sheet on screen. 
 
-[images/basic-flow.png](basic-flow)
+![Basic flow](basic-flow.png)
 
 If the user is unauthenticated, they should see a "Sign in with Google" button. Once redirected
 back, they should see a login link. When they click on this link, they should see the contents of
@@ -154,7 +154,7 @@ about HappyAPI.
 
 We load and validate this configuration on application startup using HappyAPI's `prepare-config` function.
 
-```
+```clojure
 (defn use-happyapi-config
   "Expand happyapi configuration"
   [{:keys [happyapi/config] :as ctx}]
@@ -166,13 +166,13 @@ We load and validate this configuration on application startup using HappyAPI's 
 
 The spreadsheet ID is in an environment variable called `GSHEETS_SHEET_ID`.
 
-```
+```clojure
  :gsheets/spreadsheet-id #biff/env "GSHEETS_SHEET_ID"
 ```
 
 Our application will create an `auth` with an access token. Here is the malli schema:
 
-```
+```clojure
 {
   :auth/id :uuid
 	 :auth [:map {:closed true}
@@ -194,7 +194,7 @@ Our application will create an `auth` with an access token. Here is the malli sc
 The home page displays a link to a spreadsheet if we are authenticated, and allows us to start an
 authentication otherwise.
 
-```
+```clojure
 (defn home-page [{:keys [biff/db app/get-user] :as ctx}]
   (let [user (get-user ctx)
         auth (biff/lookup db :auth/user user)]
@@ -221,7 +221,7 @@ We are requesting the scopes necessary to get a single spreadsheet.
 We call `auth/start` to obtain a login link given a user ID, provider and scope list, getting back a
 login URL. This URL should in theory be valid only for a minutes.
 
-```
+```clojure
 (defn start-auth [{:keys [biff/db] :as ctx}]
   (let [args   (sheets/spreadsheets-get nil) ;; hacky
         scopes (:scopes args)
@@ -245,7 +245,7 @@ user hasn't yet clicked on it.
 The `finish-auth` handler gets code and state strings from query params and passes them on to the
 `auth/finish` function.
 
-```
+```clojure
 (defn finish-auth [{:keys [query-params] :as ctx}]
   (let [{:strs [code state]} query-params
         result (auth/finish ctx {:code code :state state})])
@@ -261,7 +261,7 @@ single Temporal authentication workflow.
 The `auth/start` function checks parameters passed in by the user and starts the authentication
 workflow.
 
-```
+```clojure
 (defn start [ctx {:keys [user provider scopes] :as params}]
   (if (u/valid? ctx ::create params)
     (let [id (str (random-uuid))
@@ -277,7 +277,7 @@ workflow.
 The `auth/finish` function is similar, but sends a `::callback` signal, passing the auth code and
 state. (A signal is a named message with arguments, which the workflow can recognize and react to.)
 
-```
+```clojure
 (defn finish [ctx {:keys [code state] :as params}]
   (if (u/valid? ctx ::finish params)
     @(-> (workflow/start ctx authentication
@@ -292,8 +292,8 @@ state. (A signal is a named message with arguments, which the workflow can recog
 By looking at the last two functions, you can se that `workflow/start` is the single entrypoint to
 either starting a workflow or continuing a workflow that is already running. This is one of the key
 design decisions of Temporal, and it takes some time to get used to. It is also what makes it
-powerful: a long-running workflow can be started by one process and then picked up by another,
-perhaps on a different machine, perhaps even written in a different language. 
+powerful: a long-running workflow (function) can be started by one process and then picked up by
+another, perhaps on a different machine.
 
 The rule is that a worflow with a given ID is only runs once at a time. If that workflow is
 stopped - in our example, it stops while waiting for an auth code - it can be restarted by [sending
@@ -315,19 +315,18 @@ concurrently.
   ;; Use workflow arguments as initial workflow state
   (let [wf-state (atom wf-args)]
 
+    ;; Exchange code on callback signal
     (sig/register-signal-handler!
      (fn [signal-name {:keys [state] :as args}]
-       (let [expected (:state @wf-state)
-             args     (merge @wf-state args)             
-             result   (when (= (keyword signal-name) ::callback)
-                        (if (= state expected)
-                          @(a/invoke exchange-code args)
+       (when (= (keyword signal-name) ::callback)
+         (let [expected (:state @wf-state)
+               result   (if (= state expected)
+                          @(a/invoke exchange-code (merge @wf-state args))
                           (throw+ {:type ::invalid-state
                                    :state state
                                    :expected expected
-                                   ::te/non-retriable true})))]
-
-         (swap! wf-state merge result))))
+                                   ::te/non-retriable true}))]
+           (swap! wf-state merge result)))))
 
     ;; Wait until we have an access token
     (w/await
@@ -348,19 +347,85 @@ built and versioned. Once you get it, it starts being kind of second nature.
 
 ## Running
 
-We start the application
+We start Temporal and the application
 
 ```
 temporal server start-dev
-```
-
-Start the application
-
-```
 clj -M:dev dev
 ```
 
-When we navigate to the application, we see 
+When we navigate to the application, we see the start page
+
+![01-start](01-start.png)
+
+The Temporal codec server at `localhost:8233` has no running workflows.
+
+![03-no-workflows](03-no-workflows.png)
+
+When we click "start authentication", we see the login link.
+
+![02-login](02-login.png)
+
+One workflow is running!
+
+![04-one-workflow](04-one-workflow.png)
+
+Clicking on the link takes us to Google, where we can choose the account...
+
+![05-choose-account](05-choose-account.png)
+
+Add permissions...
+
+![06-permissions](06-permissions.png)
+
+Now we have credentials stored in the databasem, and we can see the "Show spreadsheet" link.
+
+![07-show-spreadsheet](07-show-spreadsheet.png)
+
+The contents of the spreadsheet as JSON
+
+![08-spreadsheet-json](08-spreadsheet-json.png)
+
+The corresponding workflow is now finished. We will click on it.
+
+![09-completed](09-completed.png)
+
+The timeline view shows the time the link was active, the callback signal, and then the
+`exchange-code` and `persist-auth` activities.
+
+![10-timeline](10-timeline.png)
+
+Below the timeline there is an Event History section. It shows a sequence of events which compose the worklflow execution. `WorkflowExecutionStarted`, `WorkflowExecutionSignaled`, `WorkflowExecutionSignaled` record the arguments passed into and out of the workflow.  
+
+Similarly, `ActivityTaskScheduled` and `ActivityTaskCompleted` record arguments passed into and out of any activites that the workflow calls.
+
+Many events in this workflow were replayed twice: 
+
+![10-event-history](10-event-history.png)
+
+In our example, the first few events were replayed twice:  once when we started the workflow, and once when we continued it. 
+
+Let's look at the `WorkflowExecutionCompleted` event to see workflow output:
+
+![11-nippy](11-nippy.png)
+
+We can't see anything! The result shown here is base64-encoded, nippy-encoded edn data. 
+
+Temporal can issue a CORS request to a "codec server" to decode this for display. I wrote a simple
+codec server ring handler which `thaw`s the payload data and sends the result over the wire.
+
+![12-codec-server](12-codec-server.png)
+
+Once selected, the browser will fire off `OPTIONS` and `POST /codec/decode` requests.
+
+![13-decoded](13-decoded.png)
+
+The decode version shows the contents of the `state` atom, which we returned from the workflow.
+
+## What we did
+
+1. Started a workflow, created a state
+2. 
 
 ## Caveats
 
