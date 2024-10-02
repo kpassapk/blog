@@ -105,7 +105,7 @@ So what are authentication's "colors"?
 
 ![colors](colors.png)
 
-The sync variant (gren) is simplest to use and appropriate for applications where we can afford to
+The sync variant (blue) is simplest to use and appropriate for applications where we can afford to
 block. The async variant (red) is best for large response payloads, where we may want to have lots of requests
 going on at the same time. (This is tricky anyway because of rate limiting.)
 
