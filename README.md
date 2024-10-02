@@ -1,4 +1,4 @@
-# Blog
+# https://kpassa.me
 
 Personal blog
 
@@ -14,4 +14,6 @@ Go to the URL shown in the console.
 
 ## Publishing
 
-If you are a collaborator in this repo, go to netlify and sign in with github.
+- main publishes to blog
+- branch should show a preview link
+
