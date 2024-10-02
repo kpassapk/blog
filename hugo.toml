@@ -12,7 +12,11 @@ theme = 'paper'
 
     avatar = 'kyle.passarelli@gmail.com'
     name = 'Kyle Passarelli'
-    bio = 'Engineering @ yalo'
+    bio = '''
+Co-founder, unifica.ai.
+
+Available for consulting work!
+'''
 
   # giscus
 [params.giscus]
