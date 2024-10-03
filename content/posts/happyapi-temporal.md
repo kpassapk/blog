@@ -101,7 +101,7 @@ talking about UI concerns or handlers.
 
 ## Auth colors
 
-So what are authentication's "colors"? 
+So what are authentication's "[colors][what-color]"?
 
 ![colors](colors.png)
 
@@ -400,7 +400,7 @@ When we navigate to the application, we see the start page
 
 ![01-start](01-start.png)
 
-The Temporal codec server at `localhost:8233` has no running workflows.
+The Temporal server at `localhost:8233` has no running workflows.
 
 ![03-no-workflows](03-no-workflows.png)
 
