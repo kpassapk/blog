@@ -5,7 +5,7 @@ draft: false
 ---
 
 Oauth2 has become the dominant authentication mechanism for Web APIs. It is more secure than than
-API keys since the user is invovled in the login flow and since the tokens it produced are
+API keys since the user is involved in the login flow and since the tokens it produces are
 short-lived.
 
 Tech giants like Google and Amazon rely on OAuth2 to gatekeep access to their immense fleet of APIs.
@@ -14,13 +14,13 @@ important, and as users demand more data interoperability across platforms.
 
 OAuth2 is simple in principle, but a bit tricky to implement. This is because its main
 authentication flow, called the authorization code flow, is callback-driven. This makes it hard to
-write scripts or applications that run in the background; in web apps which do have HTTP handlers
-that can handle callbacks, it can result in poor separation of concerns and brittle code.
+write scripts or applications that run in the background. In Web apps that can handle callbacks, it
+can result in poor separation of concerns and brittle code.
 
 Over the last few weeks, I have been checking out [HappyAPI][happyapi], by Timothy Pratley. This
-newly released Clojure library simplifies authenticaton with OAuth2 APIs, without relying on Java
+newly released Clojure library simplifies authentication with OAuth2 APIs, without relying on Java
 SDKs for each provider. The library uses code generation to turn API specifications into runnable
-specifications. In this way, it is aligned with the trend towards data-driven libraries, like
+requests. In this way, it is aligned with the trend towards data-driven libraries, like
 [malli][malli], [reitit][reitit], among others.
 
 [happyapi]: https://github.com/timothypratley/happyapi
@@ -44,16 +44,16 @@ appealing simplicity of the original.
 
 I hoped to find a better solution in the [async][ring-async] arity of the middleware functions. What
 this a case of selecting the right function "[color][what-color]", and making everything
-asyncrhonous?
+asynchronous?
 
 [ring-async]: https://github.com/ring-clojure/ring/blob/master/SPEC.md
 [what-color]: https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/
 
-I was quickly disabused of ths notion when I considered realistic user behavior: we have to wait for
+I was quickly disabused of this notion when I considered realistic user behavior: we have to wait for
 the user to authenticate outside our application, and when they return pick up where we left off.
 They might never return, they might return with credentials, or they might return without them. If
 we dedicate a thread to waiting for them, it won't be a scalable solution. If we try to do it all
-async, we lose the user and can't handle their return. If our webservice has more than one instance,
+async, we lose the user and can't handle their return. If our Web service has more than one instance,
 it won't work.
 
 Both sync and async auth have a problem. Looks like auth comes in a few more "colors"! Before we
@@ -61,10 +61,10 @@ describe them, let's look at the tried and tested way of solving this.
 
 ## The Durable Workflow Pattern
 
-In a robust Web service we have to deal with storing state. This state consists of domain models for
-our application - things like users, posts, comments, whatever - and some state that is there purely
-to model things that take several steps to complete. Let's call the former "application models", and
-the latter "workflow state".
+In a robust Web service we have to deal with storing state. This state consists of models of our
+application domain - things like users, posts, comments, whatever - and some state that is there
+purely to model things that take several steps to complete. Let's call the former "application
+models", and the latter "workflow state".
 
 For user authentication, we might define:
 
@@ -75,8 +75,8 @@ user redirects back. If the user doesn't come back after a few minutes, perhaps 
 to do. We may want to delete the auth request, or update it with a `status` that will be helpful
 later on.
 
-(NB: "state" or "status" database columns are tells: they are dead giveaways that the model in
-question is acting as workflow state, as opposed to an application model.)
+(_NB: "status" database columns are tells: they give away that the model in question is acting as
+workflow state, as opposed to an application model._)
 
 We might also define functions like `create-auth-request` and `create-auth` to create or wrap up the
 process, and a `cleanup-auth-requests` to periodically handle incomplete requests. These functions,
@@ -120,8 +120,8 @@ authorization server, and an application, as shown in the image below.
 
 [auth-code]: https://datatracker.ietf.org/doc/html/rfc6749#section-1.3.1
 
-When a user tries to access a protected resource, they are rediceted to a login apge. This login
-link contains a "state" parameter, lated validated by the client when the user is redirected back
+When a user tries to access a protected resource, they are redirected to a login page. This login
+link contains a "state" parameter, later validated by the client when the user is redirected back
 with an authorization code. 
 
 If the state parameter is OK, the client exchanges the auth code for an access token and refresh
@@ -131,7 +131,7 @@ typically undocumented, but they seem to last many months or even years.
 
 Web application store access tokens and refresh tokens in the database in an encrypted format, like
 a password. On every request to a protected resource, the client checks if the access token is still
-valid, and refreshes it otherise.
+valid, and refreshes it otherwise.
 
 ## Objective
 
@@ -152,12 +152,12 @@ short-lived state management - in other words, avoid having models like `auth-re
 not part of the application's functionality.
 
 The basic pattern I have been exploring recently is similar to the one used by [yum brands][yum]:
-use the database for models that are significant to the applicaiton, keep workflow state in
+use the database for models that are significant to the application, keep workflow state in
 Temporal.
 
 [yum]: https://www.youtube.com/watch?v=PcUWphfLyMA
 
-Oh and we want the app process to be obserable.
+Oh and we want the app process to be observable.
 
 ## Setup
 
@@ -172,11 +172,12 @@ The first step is to create a [client][setup] in Google Cloud, and set the redir
 
 In [deps.edn][deps], we use HappyAPI v0.1.3 and the [unifica/temporal][unifica-temporal] library,
 which uses the Manetu [Clojure SDK][manetu] and adds some convenience functions that make it easier
-to use with Biff. The remaining dependencies are out of the box.
+to use with [Biff][biff]. The remaining dependencies are out of the box.
 
 [unifica-temporal]: https://github.com/unifica-ai/components/tree/main/temporal
 [manetu]: https://github.com/manetu/temporal-clojure-sdk
 [deps]: https://github.com/kpassapk/happyapi-temporal/blob/main/deps.edn
+[biff]: https://biffweb.com
 
 In `resources/config.edn`, we configure the HTTP client and JSON library to the ones used by Biff.
 ([Clj-HTTP][clj-http] / [Cheshire][cheshire]). This configurability is one of the innovative things
@@ -335,7 +336,7 @@ design decisions of Temporal, and it takes some time to get used to. It is also 
 powerful: a long-running workflow (function) can be started by one process and then picked up by
 another, perhaps on a different machine.
 
-The rule is that a worflow with a given ID is only runs once at a time. If that workflow is
+The rule is that a workflow with a given ID is only runs once at a time. If that workflow is
 stopped - in our example, it stops while waiting for an auth code - it can be restarted by [sending
 a signal to it][signal-with-start].
 
@@ -438,11 +439,11 @@ The timeline view shows the time the link was active, the callback signal, and t
 ![10-timeline](10-timeline.png)
 
 Below the timeline there is an Event History section. It shows a sequence of events which compose
-the worklflow execution. `WorkflowExecutionStarted`, `WorkflowExecutionCompleted`, and
+the workflow execution. `WorkflowExecutionStarted`, `WorkflowExecutionCompleted`, and
 `WorkflowExecutionSignaled` record the arguments passed into and out of the workflow.
 
 Similarly, `ActivityTaskScheduled` and `ActivityTaskCompleted` record arguments passed into and out
-of any activites that the workflow calls.
+of any activities that the workflow calls.
 
 ![10-event-history](10-event-history.png)
 
@@ -515,3 +516,7 @@ complex scenarios, and are more easy to test.
 
 Get in touch if you have a complex integration challenge and you think Temporal / Clojure might be a
 good fit.
+
+<!-- Local Variables: -->
+<!-- jinx-local-words: "happyapi" -->
+<!-- End: -->
