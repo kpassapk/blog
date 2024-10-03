@@ -96,8 +96,7 @@ another.
 [temporal]: https://temporal.io
 
 Although this is example is simple, it shows how we can implement applications that have resources
-with long-running setup, potentially involving other systems or people in the loop, all without
-talking about UI concerns or handlers.
+with long-running setup, potentially involving other systems or people in the loop.
 
 ## Auth colors
 
@@ -113,8 +112,8 @@ And we have a brand new color: green, for durable workflow authentication :)
 
 ## OAuth2 workflow
 
-The steps in the Oauth2 [authorization code grant][auth-code] involves a resource owner, an
-authorization server, and an application, as shown in the image below.
+The steps in the Oauth2 [authorization code grant][auth-code] involves a resource server, an
+authorization server, and a client application, as shown in the image below.
 
 ![auth-seq](authcode.webp)
 
