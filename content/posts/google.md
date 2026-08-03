@@ -1,19 +1,17 @@
 ---
-title: We are drowning in Google's magnanimity
-date: 2023-11-14T20:00:00-05:00
+title: "We are drowning in Google's magnanimity"
+date: 2023-11-14
+draft: false
+source: "org/google.org"
 ---
 
 I've had a sneaking suspicion for a whle that OKRs - as in Objectives and Key
-Results - are in fact clever device deployed by Google [^1] to throw startups off
+Results - are in fact clever device deployed by Google&nbsp;[^fn:1] to throw startups off
 track.
-
-[^1]: OKRs were developed at Intel, but I learned about them from Google Ventures, so I'll blame Google for evangelizing.
 
 The appeal of OKRs is in their perceived simplicity: any problem large, or
 small, organizational or technical, made solvable by careful setting of O's and
-KR's.[^2]
-
-[^2]: Just remember to cascade your KRs and figure out if you want 0.7 attainment or more. And never tak about outputs, only outcomes.
+KR's.[^fn:2]
 
 It never plays out as promised. A few cycles deep into OKRs will leave
 startups wondering why they're so dumb they can't implement what seems like a
@@ -77,9 +75,7 @@ Kubernetes.
 Yes, the name is weird, but it comes with convenient shorthand! Via `k8s` we can
 `kubectl apply` our way to some lovely abstractions: Horizontal Pod Autoscalers!
 Node Affinities! StatefulSets! NetworkPolicies! etc. Just being in the vicinity
-of such new Terms makes us feel empowered, even if they are a [lot to learn][iceberg].
-
-[iceberg]: https://asankov.dev/blog/2022/06/12/demystifying-the-kubernetes-iceberg-part-5/
+of such new Terms makes us feel empowered, even if they are a [lot to learn](https://asankov.dev/blog/2022/06/12/demystifying-the-kubernetes-iceberg-part-5/).
 
 Striving to be research-ey and practical at the same time, k8s evolves a huge
 configuration area - only to paper it over with lots of YAML files. Every main
@@ -101,7 +97,7 @@ shifted-left to, hard. And it sucks.
 Whereas before we had perfectly good tools to solve problems for our customers,
 now we need an advanced degree just to figure out our new machinery - which, we
 are told, resolves all earlier problems, but from first principles. (We were too
-busy being pragmatic to see it!) 
+busy being pragmatic to see it!)
 
 It's the OKR problem all over again, only this time without even the veneer of
 simplicity.
@@ -117,3 +113,6 @@ We are drowning in a sea of Google's magnanimity, and it's sure going to be hard
 to find our way out.
 
 Stay tuned for "We are drowning in Facebook's magnanimity" :)
+
+[^fn:1]: OKRs were developed at Intel, but I learned about them from Google Ventures, so I'll blame Google for evangelizing.
+[^fn:2]: Just remember to cascade your KRs and figure out if you want 0.7 attainment or more. And never tak about outputs, only outcomes.

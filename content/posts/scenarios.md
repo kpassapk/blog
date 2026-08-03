@@ -1,6 +1,8 @@
 ---
-title: Optimizing Go Tests for Readability
-date: 2023-11-05T20:00:00-05:00
+title: "Optimizing Go Tests for Readability"
+date: 2023-11-05
+draft: false
+source: "org/scenarios.org"
 ---
 
 Software developers spend much more time reading code than writing code. By
@@ -24,13 +26,14 @@ scenarios to express test setup. By making tests more friendly to new readers,
 they help speed up change cycles and make software more maintainable in the long
 run.
 
-## Test Setup in OO-land
+
+## Test Setup in OO-land {#test-setup-in-oo-land}
 
 Unit testing is key to the overall reliability of a system. Although there is a
 surprising amount of debate on the subject, the general rule that higher unit
 test coverage leads to more reliable code is beyond question.
 
-Unit tests should test the smallest unit of code possible: a function. 
+Unit tests should test the smallest unit of code possible: a function.
 
 If the function under test is a pure function, tests are straightforward:
 a test takes a set of inputs, runs the function and checks the results.
@@ -38,8 +41,7 @@ a test takes a set of inputs, runs the function and checks the results.
 Object-based test code will require more setup. The object of the class
 (equivalent to the receiver in go) needs to be initialized somehow. Each of the
 object's collaborators may have varied state. Doing this setup compactly is key
-to successful testing of object-based code. (See this [great
-talk](https://youtu.be/Iel4vVYgExA?si=cVbGO0SU8lKoueyG) for more on test setup.)
+to successful testing of object-based code. (See this [great talk](https://youtu.be/Iel4vVYgExA?si=cVbGO0SU8lKoueyG) for more on test setup.)
 
 The Go community uses table-driven testing heavily to keep tests concise. This
 pattern is particularly great for simple functions. For functions with complex
@@ -48,7 +50,8 @@ receivers, it is hard to keep these tests compact and easy to understand.
 We will walk through a table-driven test on a simple receiver object.
 Then we will rewrite it in a more human-friendly way as a scenario.
 
-## Code to test
+
+## Code to test {#code-to-test}
 
 We will test a greeter object, which can be constructed with a language string.
 It will provide us with a greeting in that language.
@@ -66,7 +69,8 @@ type greeter struct {
 }
 ```
 
-When we create a new greeter, we provide a language. 
+When we create a new greeter, we provide a language.
+
 ```golang
 func NewGreeter(l string) greeter {
 	return greeter{
@@ -104,9 +108,10 @@ func (g greeter) Goodbye() (string, error) {
 }
 ```
 
-## Table-driven tests
 
-In a [table-driven][tabledriven] test, each table entry is a complete test case
+## Table-driven tests {#table-driven-tests}
+
+In a [table-driven](https://github.com/golang/go/wiki/TableDrivenTests) test, each table entry is a complete test case
 with inputs and expected results, and sometimes with additional information such
 as a test name to make the test output easily readable. This can help reduce
 test duplication, so that every variant being tested is presented as a line in
@@ -115,9 +120,7 @@ the table.
 Given a table of test cases, the actual test simply iterates through all table
 entries and for each entry performs the necessary tests.
 
-[tabledriven]: https://github.com/golang/go/wiki/TableDrivenTests
-
-Using the [gotests][gotests] library to create a test,
+Using the [gotests](https://github.com/cweill/gotests) library to create a test,
 
 ```shell
 gotests -exported go_test.go
@@ -159,8 +162,7 @@ the arguments to call the function with, and finally the desired string and
 whether or not an error is desired.
 
 The setup function below uses a closure as a test function, providing arguments
-to the `Hello` function and then checking the result. The statement `if (err !=
-nil) != tt.wantErr` is true if an error is desired and not obtiained, or if an
+to the `Hello` function and then checking the result. The statement `if (err != nil) != tt.wantErr` is true if an error is desired and not obtiained, or if an
 error was not desired but was obtained.
 
 A good thing about its code is that all the logic is in one place. To add an
@@ -180,7 +182,7 @@ is an error.
 }
 ```
 
-It was easy to achieve branch coverage with this auto-generated test. 
+It was easy to achieve branch coverage with this auto-generated test.
 
 Even for a very simple greeter class, however, there is a lot of input data to
 go in the table. The test code (below the table) is not easy to read. In more
@@ -193,9 +195,8 @@ If I am a newcomer to this code, it may be difficult reading the test code above
 and seeing immediately how the greeting functions and their receiver struct
 work.
 
-[gotests]: https://github.com/cweill/gotests
 
-## Scenarios
+## Scenarios {#scenarios}
 
 We would like to write a test like this:
 
@@ -216,7 +217,7 @@ We would like to write a test like this:
 
 This will scale up better with more complex tests, and is more friendly to newcomers.
 It is easy to scan this function and get a feel for what the function is supposed to
-be doing. 
+be doing.
 
 The conventions are simple: the `given[X]` functions should set up the receiver;
 if the receiver has mocked collaborators, they could provided as arguments here.
@@ -224,12 +225,13 @@ The `assertX` functions should check the output values of the `hello` function,
 including error values. Lastly, The `when` method should invoke the function and
 save the results.
 
-## Generic tester class
+
+## Generic tester class {#generic-tester-class}
 
 Let's define a generic Tester class that will help us write unit tests for the
 greeter in the style above. It assumes the receiver is a struct and that the
 function returns a value and an error. Most complex real-world functions in Go
-have this signature. 
+have this signature.
 
 The tester will be generic on `F`, a struct type containing the receiver fields;
 `A`, which defines the data type for each argument to the function under test;
@@ -250,7 +252,7 @@ The constructor takes the `args` just like the table-driven test. The
 `givenFields` method sets the tester's `fields` and returns the tester
 so that we can chain the commands if we want.
 
-```
+```text
 func newTester[F, A, R any](t *testing.T, args A) *tester[F, A, R] {
 	return &tester[F, A, R]{
 		assert: assert.New(t),
@@ -276,7 +278,7 @@ type fields struct {
    lang lang
 }
 
-// A tester for a struct receiver with 'fields', 
+// A tester for a struct receiver with 'fields',
 t := newTester[fields, args, string]
 
 t.givenFields(fields{lang: "EN"})
@@ -284,7 +286,7 @@ t.givenFields(fields{lang: "EN"})
 ```
 
 Next we want to add a function `t.when(...)` that invokes the function under
-test with arguments that we pass in. 
+test with arguments that we pass in.
 
 ```go
 func (s *tester[F, A, R]) when(call func(F, A) (R, error)) {
@@ -308,7 +310,7 @@ hello := func(fields greeterFields, args args) (string, error) {
     return g.Hello(args.name)
 }
 
-// A tester for a struct receiver with 'fields', 
+// A tester for a struct receiver with 'fields',
 t := newTester[fields, args, string]
 
 t.givenFields(fields{lang: "EN"})
@@ -317,9 +319,7 @@ t.when(hello)
 ```
 
 Finally, we want to make some assertions on the output. In this example,
-we are wrapping the popular [testify][testify] package.
-
-[testify]: https://github.com/stretchr/testify
+we are wrapping the popular [testify](https://github.com/stretchr/testify) package.
 
 ```go
 func (s *tester[F, A, R]) assertResultIs(result R) {
@@ -339,7 +339,7 @@ func (s *tester[F, A, R]) assertError() *tester[F, A, R] {
 
 Putting it all together, our test can be called like this:
 
-```
+```text
 type args struct {
    name string
 }
@@ -353,7 +353,7 @@ hello := func(fields greeterFields, args args) (string, error) {
     return g.Hello(args.name)
 }
 
-// A tester for a struct receiver with 'fields', 
+// A tester for a struct receiver with 'fields',
 t := newTester[fields, args, string]
 
 t.givenFields(fields{lang: "EN"})
@@ -362,9 +362,10 @@ t.assertNoError()
 t.assertResultIs("hi, Yao")
 ```
 
-## Table-driven test, revisited
 
-Now let's put it in a table-driven, *scenario-driven* test. 
+## Table-driven test, revisited {#table-driven-test-revisited}
+
+Now let's put it in a table-driven, _scenario-driven_ test.
 
 ```go
 func TestGreeter_Hello(t *testing.T) {
@@ -410,7 +411,7 @@ func TestGreeter_Hello(t *testing.T) {
 ```
 
 The table now contains 3 elements only: `name`, `args`, and `scenario`. This can be
-the same for every test in the company codebase, so the reader can just scan this 
+the same for every test in the company codebase, so the reader can just scan this
 quickly and get right to the setup functions.
 
 The tester `greeterTester` at package level and reused for all the greeter's functions.
@@ -418,10 +419,11 @@ The tester `greeterTester` at package level and reused for all the greeter's fun
 
 By implementing new `given...` methods on the tester, we can abstract away any complex
 setup of the receiver, should it be necessary. The assertions are easy to read, and can
-be reused across the coebase.  The test setup code in `t.Run(...)` at the bottom of the 
+be reused across the coebase.  The test setup code in `t.Run(...)` at the bottom of the
 file is easy to read as well.
 
-## Conclusion
+
+## Conclusion {#conclusion}
 
 Object-based langauges like Go require careful setup to put each object under
 test in the necessary state. This test setup can obscure the meaning of the

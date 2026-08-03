@@ -1,7 +1,10 @@
 baseURL = 'https://kpassa.me/'
 languageCode = 'en-us'
-title = 'kpassa.me'
+title = 'Letter to the $EDITOR'
 theme = 'paper'
+
+[markup.goldmark.renderer]
+    unsafe = true
 
 [params]
     twitter = "kpassapk"
@@ -11,11 +14,9 @@ theme = 'paper'
     rss = true
 
     avatar = 'kyle.passarelli@gmail.com'
-    name = 'Kyle S Passarelli'
+    name = 'Letter to the $EDITOR'
     bio = '''
-Clojure developer. Co-founder, unifica.ai.
-
-Available for consulting work!
+    Build apps. Not too complex. Mostly self-hosted.
 '''
 
   # giscus
