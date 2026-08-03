@@ -14,11 +14,9 @@ theme = 'paper'
     rss = true
 
     avatar = 'kyle.passarelli@gmail.com'
-    name = 'Kyle S Passarelli'
+    name = 'Letter to the $EDITOR'
     bio = '''
-Clojure developer. Co-founder, unifica.ai.
-
-Available for consulting work!
+    Build apps. Not too complex. Mostly self-hosted.
 '''
 
   # giscus
