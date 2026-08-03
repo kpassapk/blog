@@ -1,0 +1,85 @@
+/* ------------------------------------------------------------------ */
+/* Tufte-style sidenotes (see layouts/_default/single.html).           */
+/* Only layout/placement rules live here — fonts and colors are        */
+/* inherited from the paper theme.                                     */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --sidenote-col: 17rem; /* width of the margin column */
+  --sidenote-gap: 2.5rem; /* gap between body text and margin column */
+}
+
+/* The checkbox is a pure-CSS toggle; never visible. */
+input.sidenote-toggle {
+  display: none;
+}
+
+/* The numbered reference: a <label> inside a <sup>, so it inherits the
+   theme's superscript styling. */
+.sidenote-ref label {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+/* Number prefix inside the sidenote, matching the reference. */
+.sidenote .sidenote-num {
+  font-size: 0.75em;
+  vertical-align: super;
+  line-height: 0;
+  margin-right: 0.15em;
+}
+
+/* ---------- Narrow screens: collapsed, tap the number to expand ----- */
+
+.sidenote {
+  display: none;
+}
+
+.sidenote-ref label {
+  cursor: pointer;
+}
+
+input.sidenote-toggle:checked + .sidenote {
+  display: block;
+  margin: 0.8rem 0 1rem 0;
+  padding: 0.1rem 0 0.1rem 1rem;
+  border-left: 2px solid rgba(128, 128, 128, 0.45);
+  font-size: 0.85em;
+  line-height: 1.55;
+}
+
+/* ---------- Wide screens: notes sit in a right margin column -------- */
+
+@media (min-width: 1080px) {
+  /* Widen the page only when the article actually has sidenotes.
+     --w is the paper theme's content width variable. */
+  main:has(> article.has-sidenotes) {
+    max-width: calc(var(--w) + var(--sidenote-col) + var(--sidenote-gap));
+  }
+
+  /* Keep the text measure at the theme's original width; the extra
+     space becomes the margin column. */
+  main:has(> article.has-sidenotes) > article.has-sidenotes {
+    padding-right: calc(var(--sidenote-col) + var(--sidenote-gap));
+  }
+
+  article.has-sidenotes .sidenote,
+  article.has-sidenotes input.sidenote-toggle:checked + .sidenote {
+    display: block;
+    float: right;
+    clear: right;
+    width: var(--sidenote-col);
+    margin-right: calc(-1 * (var(--sidenote-col) + var(--sidenote-gap)));
+    margin-top: 0.2rem;
+    margin-bottom: 1.2rem;
+    padding: 0;
+    border-left: none;
+    font-size: 0.8em;
+    line-height: 1.55;
+  }
+
+  article.has-sidenotes .sidenote-ref label {
+    cursor: text;
+  }
+}

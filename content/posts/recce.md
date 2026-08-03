@@ -1,12 +1,15 @@
 ---
-title: 'Recce: A Go test recorder compatible with REST Client'
-date: 2023-08-13T19:30:00-05:00
+title: "Recce: A Go test recorder compatible with REST Client"
+date: 2023-08-13
+draft: false
+source: "org/recce.org"
 ---
 
-*Recce (ReKi)* **[V]**: to visit [a] place in order to become familiar with it.
-- Collins
+_Recce (ReKi)_ **[V]**: to visit [a] place in order to become familiar with it.
 
-[-> github](https://github.com/kpassapk/recce)
+-   Collins
+
+[-&gt; github](https://github.com/kpassapk/recce)
 
 You're hard at work when a new task comes in: you have to whip up a new REST API and
 hash out the contract ASAP for the latest product feature. You start right away.
@@ -40,7 +43,8 @@ If this sounds good, then read on! Code below is in Go, but should be easily
 replicable in any language. You can also jump straight to
 [the code](https://github.com/kpassapk/recce) on Github.
 
-## REST(less)
+
+## REST(less) {#rest--less}
 
 REST APIs are a response to the SOAP days of super-heavy locked down contracts.
 Perhaps an overcorrection: they are so contract-averse that really anything
@@ -68,30 +72,25 @@ To be really fast, why not see if we can stay away from the unhappy Postman and
 cURL duo altogether, doing all testing and example-saving in the amazing and expensive IDEs
 at our disposal.
 
-## Recordings
 
-Back in my Ruby days, one of my favorite test tools was called [VCR][vcr]. As you made
+## Recordings {#recordings}
+
+Back in my Ruby days, one of my favorite test tools was called [VCR](https://github.com/vcr/vcr). As you made
 requests to external APIs, the Ruby gem would keep recordings in files, and then
 monkey-patch the HTTP client to return those answers instead of the real thing.
 Super useful, because even under-documented aspects of the APIs would be
 captured. Things like missing headers, incorrect content types, bad JSON bodies,
 trailing backslashes in paths (yes, things go wrong even here).
 
-[vcr]: https://github.com/vcr/vcr
-
 Apart from helping you test, the set of recordings it built up over time was
 kind of like documentation, if you squinted a bit. They were meant to be
 machine-readable, but often I would find myself looking at versioned recordings
 on Github. The format was a bit strange, but you could see requests and response
 codes, bodies, headers and the like, all in one place. The Ruby tool spawned a bunch
-of [variants](govcr) in [other][vcrpy] [languages][betamax], which testifies to the genral
+of [variants](https://github.com/dnaeon/go-vcr) in [other](https://vcrpy.readthedocs.io/en/latest/usage.html) [languages](https://github.com/betamaxteam/betamax), which testifies to the genral
 usefulness of this pattern.
 
 Over time, recordings of our own APIs became a kind of ad hoc - but effective - documentation set.
-
-[govcr]: https://github.com/dnaeon/go-vcr
-[vcrpy]: https://vcrpy.readthedocs.io/en/latest/usage.html
-[betamax]: https://github.com/betamaxteam/betamax
 
 Coming to Go, things felt a bit more strict. Not only is monkey-patching frowned
 upon / not even possible, but testing is more pure in terms of how you are
@@ -101,11 +100,10 @@ faster to run, in wall-clock seconds. But part of was left wanting good old VCR
 when I was still feeling things out. I for sure missed the versioned recording
 files.
 
-Along the way I made one fortunate discovery: VS Code [REST
-client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
+Along the way I made one fortunate discovery: VS Code [REST client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
 as an alternative to Postman and cURL. It uses a format like this:
 
-```
+```text
 POST /api
 Content-Type: application/json
 
@@ -115,21 +113,18 @@ Content-Type: application/json
 ```
 
 It's not an IETF standard as far as I can see, but perhaps it should be.
-Implementaitons are widepsread. ([Emacs][restemacs], [Vim][restvim],
-[Intellij][intellij]) Seems like it brings back a bit of the simplicity REST was
+Implementaitons are widepsread. ([Emacs](https://github.com/pashky/restclient.el), [Vim](restclient.vim),
+[Intellij](https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html)) Seems like it brings back a bit of the simplicity REST was
 supposed to be all about!
 
-[restemacs]: https://github.com/pashky/restclient.el
-[restvim]: restclient.vim
-[intellij]: https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html
-
 It should be easy to record tests in Go, I thought - and why not save in a
-sorta standard format that can be immediately re-run? 
+sorta standard format that can be immediately re-run?
 
 Let's put this together bit by bit:
-1. Nice standard tests in Golang
-2. ... that save test files as they run
-3. ... in REST client format
+
+1.  Nice standard tests in Golang
+2.  ... that save test files as they run
+3.  ... in REST client format
 
 We're going to start with a sample REST API for "tasks". We will use
 table-driven tests in Golang, leaving a recording of API requests and responses
@@ -137,13 +132,14 @@ to files that can later be executed. This will give us quick feedback, and
 generate a large amount of runnable requests to play with. Perfect for the early
 stages of API design.
 
-## Our API
+
+## Our API {#our-api}
 
 Our example will let you create and retrieve a list of tasks.
 
-1. To get all tasks: `GET /tasks`
-2. To get a specific task by ID: `GET tasks/{ID}`
-3. To create a new task: `POST /tasks` with a JSON body, e.g., `{"title": "New task"}`
+1.  To get all tasks: `GET /tasks`
+2.  To get a specific task by ID: `GET tasks/{ID}`
+3.  To create a new task: `POST /tasks` with a JSON body, e.g., `{"title": "New task"}`
 
 The "create task' API, using `github.com/gorilla/mux package` for routing, would look something like this:
 
@@ -177,7 +173,7 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 
 Set up a router and a main:
 
-```
+```text
 func SetupRouter() *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/tasks", createTask).Methods("POST")
@@ -190,9 +186,9 @@ func main() {
 }
 ```
 
-To create a new task, we send a JSON-encoded task name. 
+To create a new task, we send a JSON-encoded task name.
 
-```
+```text
 POST http://localhost:8000/tasks
 Content-Type: application/json
 
@@ -201,10 +197,9 @@ Content-Type: application/json
 }
 ```
 
+If we open up this request using the REST client in VS Code, emacs, vim, or others, we can seend it and get a response back.
 
-If we open up this request using the REST client in VS Code, emacs, vim, or others, we can seend it and get a response back. 
-
-```
+```text
 HTTP/1.1 200 OK
 Content-Type: application/json
 
@@ -216,7 +211,8 @@ Content-Type: application/json
 
 It's a start! Now let's write a test for it.
 
-## Testing the "Create" endpoint
+
+## Testing the "Create" endpoint {#testing-the-create-endpoint}
 
 A table-driven test for the "create " endpoint might look like this:
 
@@ -272,10 +268,11 @@ recorder using the `httptest` package. More test cases can be added to the table
 (slice) at the top fo the test file, providing different inputs and validating
 the output against our expectation.
 
-There are some difficulties with this, however. 
-1. We have to deal with the assumption of the task ID
-2. As the API grows, the test code will get a lot more complicated
-3. The API may still be in flux
+There are some difficulties with this, however.
+
+1.  We have to deal with the assumption of the task ID
+2.  As the API grows, the test code will get a lot more complicated
+3.  The API may still be in flux
 
 If there is a failure, it will take us a second to figure out whether the error
 is due to bad test code, or bad program code. If we have time pressure in
@@ -300,7 +297,8 @@ To achieve a looser testing style, let's implement a simple tester which only
 checks response codes. Verifying the request and response bodies will be up to
 us at this stage, with the help `.rest` files
 
-## Tester
+
+## Tester {#tester}
 
 Let's write the same test but introduce a tester
 
@@ -311,8 +309,6 @@ type tester struct {
 	res    *http.Response
 }
 ```
-
-
 
 ```go
 func (s *tester) NewRequest(method, url string, body io.Reader) {
@@ -334,7 +330,7 @@ func (s *tester) CheckStatus(status int) {
 
 Then we can replace the test running code above with a simplified version
 
-```
+```text
 t.Run(tt.name, func(t *testing.T) {
     tester := Start(t)
     tester.SetRequest("POST", "/tasks", bytes.NewBuffer([]byte(tt.input)))
@@ -346,7 +342,8 @@ t.Run(tt.name, func(t *testing.T) {
 Now that we have our own tester, we can add some methods to record the request
 to a file as a side effect.
 
-## Recording the request
+
+## Recording the request {#recording-the-request}
 
 To record the test, we add a `Finish` method which creates a test file.
 
@@ -366,7 +363,7 @@ func (s *tester) Finish() {
 We will call this method with `defer` just after `Start()`, so that the files
 are written once all tests are done.
 
-```
+```text
 tester.Start()
 defer tester.Finish()
 tester.SetRequest(...)
@@ -375,7 +372,7 @@ tester.SetRequest(...)
 
 To implement `createTestFile()`, we're going to have to decide how to lay out the test files. Here is one way:
 
-```
+```text
 recordings
 └── tasks
     ├── create
@@ -388,12 +385,12 @@ recordings
 ```
 
 We will store files using the noun (tasks), then one directory for each verb,
-and then example files. Let's define "group" to be`tasks/create`, `tasks/update`
+and then example files. Let's define "group" to be `tasks/create`, `tasks/update`
 and so on. Each group will have many examples. Add the group to the tester
 struct, as well as a test case number and name, and a hostname
 to write in the test files.
 
-```
+```text
 type tester struct {
 	group  string
     tc int
@@ -404,7 +401,7 @@ type tester struct {
 
 Now let's write the function to write out or example file to disk.
 
-```
+```text
 func (s *tester) createTestFile() error {
 	// Split group into individual directories
 	directories := strings.Split(s.group, "/")
@@ -443,13 +440,12 @@ func (s *tester) createTestFile() error {
 
 The `errors.Wrap` command is from
 [github.com/pkg/errors](https://github.com/pkg/errors), and provides stack
-traces and slightly improved semantics for dealing with error chains. 
+traces and slightly improved semantics for dealing with error chains.
 
 The `prettyPrintRequest()` command will write out the `*http.Request` in a format
 understandable by the text-based REST clients:
 
-
-```
+```text
 func (s *apiScenario) prettyPrintRequest() (string, error) {
 	var buf bytes.Buffer
 
@@ -500,8 +496,7 @@ Since this function is called at the end of the tests, the `req.Body` (which as
 an `io.ReadCloser` interface) will have already been read. Its bytes are already
 "consumed", so we will read the contents into a `bytes.Buffer`:
 
-
-```
+```text
 func (s *tester) saveRequestBody() error {
 	// Check if the request has a body
 	if s.req.Body == nil {
@@ -524,7 +519,7 @@ func (s *tester) saveRequestBody() error {
 
 Let's modify `SendRequest` to call this function just before we send the request off.
 
-```
+```text
 func (s *tester) SendRequest(handler http.HandlerFunc) {
 	rr := httptest.NewRecorder()
 	if s.req.Body != nil {
@@ -540,7 +535,7 @@ func (s *tester) SendRequest(handler http.HandlerFunc) {
 
 When we run the test, we will see an example file that looks like this in `sceanrios/tasks/create/example1.rest`
 
-```
+```text
 POST localhost:8000/tasks HTTP/1.1
 
 {
@@ -550,7 +545,7 @@ POST localhost:8000/tasks HTTP/1.1
 
 When we run this example in Goland, VS Code, or any other editor which sports a REST client, we get a text response:
 
-```
+```text
 HTTP/1.1 200 OK
 Content-Type: application/json
 Date: Sat, 12 Aug 2023 22:49:04 GMT
@@ -576,12 +571,11 @@ By versioning both the request and the response, The trail of recordings will
 help us and our teammates until automated testing catches up and more robust
 documentation is built.
 
-## Recce
 
-These ideas have gone into [recce][recce], in case it may be useful to
+## Recce {#recce}
+
+These ideas have gone into [recce](https://github.com/kpassapk/recce), in case it may be useful to
 somebody. It's a super early version right now. Comments welcome.
-
-[recce]: https://github.com/kpassapk/recce
 
 Since a copy of the request and response is kept in memory, this library will be
 performant only with small requests and responses. Most of the time, this will not
@@ -590,7 +584,7 @@ be a serious limitation.
 This "light" version of the Ruby VCR-like libraries doesn't affect the calls
 made by the test code in any way, it just saves a bunch of files that are easy
 to read and can be re-run at will. I have found this feedback loop to be
-amazingly fast. 
+amazingly fast.
 
 Once the recording is no longer needed, the tester can be trivially swapped out,
 and test code will be almost unchanged.

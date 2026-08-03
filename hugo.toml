@@ -1,7 +1,10 @@
 baseURL = 'https://kpassa.me/'
 languageCode = 'en-us'
-title = 'kpassa.me'
+title = 'Letter to the $EDITOR'
 theme = 'paper'
+
+[markup.goldmark.renderer]
+    unsafe = true
 
 [params]
     twitter = "kpassapk"

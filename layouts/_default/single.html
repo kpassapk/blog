@@ -1,0 +1,162 @@
+{{ define "main" }}
+
+{{/* ------------------------------------------------------------------ */}}
+{{/* Tufte-style sidenotes: convert Goldmark footnotes into margin notes */}}
+{{/* placed next to their references, and drop the end-of-page footnote  */}}
+{{/* list. Pure template post-processing of .Content — no client-side JS. */}}
+{{/* ------------------------------------------------------------------ */}}
+{{ $content := .Content }}
+{{ $hasSidenotes := gt (len (findRE `<div class="footnotes"` $content 1)) 0 }}
+{{ if $hasSidenotes }}
+  {{/* Grab the footnote list Goldmark appends at the end of the content. */}}
+  {{ $fnBlock := index (findRE `(?s)<div class="footnotes"[^>]*>.*?</ol>\s*</div>` $content 1) 0 }}
+  {{ $items := findRE `(?s)<li id="fn:[^"]+">.*?</li>` $fnBlock }}
+  {{ range $items }}
+    {{ $num := replaceRE `(?s)^<li id="fn:([^"]+)">.*` "$1" . }}
+    {{ $note := replaceRE `(?s)^<li id="fn:[^"]+">(.*)</li>$` "$1" . }}
+    {{/* Strip the back-reference arrow link(s). */}}
+    {{ $note = replaceRE `(?:\s|&#160;|&nbsp;)*<a href="#fnref[^"]*" class="footnote-backref"[^>]*>.*?</a>` "" $note }}
+    {{/* Sidenotes live inside a paragraph, so flatten block <p>s to inline. */}}
+    {{ $note = replaceRE `</p>\s*<p[^>]*>` "<br><br>" $note }}
+    {{ $note = replaceRE `</?p[^>]*>` "" $note }}
+    {{ $note = trim $note " \n\t" }}
+    {{/* Literal $ must be escaped for the replaceRE replacement string. */}}
+    {{ $note = replace $note "$" "$$" }}
+    {{/* Replace every reference (fnref:N, fnref1:N, ...) with a numbered   */}}
+    {{/* label + hidden checkbox (narrow-screen toggle) + the sidenote.     */}}
+    {{/* $1 = the original fnref id, which is unique per reference.         */}}
+    {{ $pattern := printf `<sup id="(fnref\d*:%s)"><a[^>]*>[^<]*</a></sup>` $num }}
+    {{ $replacement := printf `<sup class="sidenote-ref"><label for="sn-$1">%s</label></sup><input type="checkbox" id="sn-$1" class="sidenote-toggle"><span class="sidenote"><span class="sidenote-num">%s</span> %s</span>` $num $num $note }}
+    {{ $content = replaceRE $pattern $replacement $content }}
+  {{ end }}
+  {{/* Remove the end-of-page footnote list. */}}
+  {{ $content = replaceRE `(?s)<div class="footnotes"[^>]*>.*?</ol>\s*</div>` "" $content }}
+{{ end }}
+
+<article{{ if $hasSidenotes }} class="has-sidenotes"{{ end }}>
+  <header class="mb-14">
+    <h1 class="!my-0 pb-2.5">{{ .Title }}</h1>
+
+    {{ if ne .Type "page" }}
+    <div class="text-xs antialiased opacity-60">
+      {{ if .Date }}
+      <time>{{ .Date | time.Format ":date_medium" }}</time>
+      {{ end }}<!---->
+      {{ $single_author := or .Params.Author site.Params.author site.Params.name }}
+      <!---->
+      {{ if $single_author }}
+      <span class="mx-1">&middot;</span>
+      <span>{{ $single_author }}</span>
+      {{ end }}
+    </div>
+    {{ end }}
+  </header>
+
+  <section>{{ $content | safeHTML }}</section>
+
+  <!-- Post Tags -->
+  {{ if .Params.tags }}
+  <footer class="mt-12 flex flex-wrap">
+    {{ range .Params.tags }} {{ $href := print (absURL "tags/") (urlize .) }}
+    <a
+      class="mb-1.5 ltr:mr-1.5 rtl:ml-1.5 rounded-lg bg-black/[3%] px-5 py-1 no-underline hover:bg-black/[6%] dark:bg-white/[8%] dark:hover:bg-white/[12%]"
+      href="{{ $href }}"
+      >{{ . }}</a
+    >
+    {{ end }}
+  </footer>
+  {{ end }}
+
+  <!-- Post Nav -->
+  {{ if not site.Params.disablePostNavigation }}<!---->
+  {{ $pages := where site.RegularPages "Type" "in" site.Params.mainSections }}<!---->
+  {{ if and (gt (len $pages) 1) (in $pages . ) }}
+  <nav
+    class="mt-24 flex overflow-hidden rounded-xl bg-black/[3%] text-lg !leading-[1.2] *:flex *:w-1/2 *:items-center *:p-5 *:font-medium *:no-underline dark:bg-white/[8%] [&>*:hover]:bg-black/[2%] dark:[&>*:hover]:bg-white/[3%]"
+  >
+    {{ with $pages.Next . }}
+    <a class="ltr:pr-3 rtl:pl-3" href="{{ .Permalink }}"
+      ><span class="ltr:mr-1.5 rtl:ml-1.5">←</span><span>{{ .Name }}</span></a
+    >
+    {{ end }}<!---->
+    {{ with $pages.Prev . }}
+    <a class="ltr:ml-auto rtl:mr-auto justify-end pl-3" href="{{ .Permalink }}"
+      ><span>{{ .Name }}</span><span class="ltr:ml-1.5 rtl:mr-1.5">→</span></a
+    >
+    {{ end }}
+  </nav>
+  {{ end }}<!---->
+  {{ end }}
+
+  <!-- Disqus -->
+  {{ if and site.Config.Services.Disqus.Shortname (not (eq .Params.comments
+  false)) }}
+  <div class="mt-24" id="disqus_thread"></div>
+  <script>
+    const disqusShortname = '{{ site.Config.Services.Disqus.Shortname }}';
+    const script = document.createElement('script');
+    script.src = 'https://' + disqusShortname + '.disqus.com/embed.js';
+    script.setAttribute('data-timestamp', +new Date());
+    document.head.appendChild(script);
+  </script>
+  {{ end }}
+
+  <!-- GraphComment -->
+  {{ if and site.Params.graphCommentId (not (eq .Params.comments false)) }}
+  <div class="mt-24" id="graphcomment"></div>
+  <script type="text/javascript">
+    var __semio__params = {
+      graphcommentId: '{{ site.Params.graphCommentId  }}',
+      behaviour: {
+        //  uid: "...",
+      },
+      // configure your variables here
+    };
+
+    function __semio__onload() {
+      __semio__gc_graphlogin(__semio__params);
+    }
+
+    (function () {
+      var gc = document.createElement('script');
+      gc.type = 'text/javascript';
+      gc.async = true;
+      gc.onload = __semio__onload;
+      gc.defer = true;
+      gc.src =
+        'https://integration.graphcomment.com/gc_graphlogin.js?' + Date.now();
+      (
+        document.getElementsByTagName('head')[0] ||
+        document.getElementsByTagName('body')[0]
+      ).appendChild(gc);
+    })();
+  </script>
+  {{ end }}
+
+  <!-- mermaid -->
+  {{- partial "mermaid.html" . -}}
+
+  <!-- giscus comment -->
+  {{ if and site.Params.giscus.repo (not (eq .Params.comments false)) }}
+  <div class="giscus mt-24"></div>
+  <script
+    src="https://giscus.app/client.js"
+    data-repo="{{ site.Params.giscus.repo }}"
+    data-repo-id="{{ site.Params.giscus.repoId }}"
+    data-category="{{ site.Params.giscus.category }}"
+    data-category-id="{{ site.Params.giscus.categoryId }}"
+    data-mapping="{{ site.Params.giscus.mapping | default (print `pathname`) }}"
+    data-strict="{{ site.Params.giscus.strict | default (print `1`) }}"
+    data-reactions-enabled="{{ site.Params.giscus.reactionsEnabled | default (print `0`) }}"
+    data-emit-metadata="{{ site.Params.giscus.emitMetadata | default (print `0`) }}"
+    data-input-position="{{ site.Params.giscus.inputPosition | default (print `top`) }}"
+    data-theme="{{ site.Params.giscus.theme | default (print `light`) }}"
+    data-lang="{{ site.Params.giscus.lang | default (print `en`) }}"
+    data-loading="{{ site.Params.giscus.loading | default (print `lazy`) }}"
+    crossorigin="anonymous"
+    async
+  ></script>
+  {{ end }}
+</article>
+
+{{ end }}

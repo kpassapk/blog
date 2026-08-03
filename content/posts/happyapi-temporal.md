@@ -1,7 +1,8 @@
 ---
-title: What color is your auth? OAuth2 with Clojure and Temporal
-date: 2024-09-15T20:00:00-05:00
+title: "What color is your auth? OAuth2 with Clojure and Temporal"
+date: 2024-09-15
 draft: false
+source: "org/happyapi-temporal.org"
 ---
 
 Oauth2 has become the dominant authentication mechanism for Web APIs. It is more secure than than
@@ -17,15 +18,11 @@ authentication flow, called the authorization code flow, is callback-driven. Thi
 write scripts or applications that run in the background. In Web apps that can handle callbacks, it
 can result in poor separation of concerns and brittle code.
 
-Over the last few weeks, I have been checking out [HappyAPI][happyapi], by Timothy Pratley. This
+Over the last few weeks, I have been checking out [HappyAPI](https://github.com/timothypratley/happyapi), by Timothy Pratley. This
 newly released Clojure library simplifies authentication with OAuth2 APIs, without relying on Java
 SDKs for each provider. The library uses code generation to turn API specifications into runnable
 requests. In this way, it is aligned with the trend towards data-driven libraries, like
-[malli][malli], [reitit][reitit], among others.
-
-[happyapi]: https://github.com/timothypratley/happyapi
-[malli]: https://github.com/metosin/malli
-[reitit]: https://github.com/metosin/reitit
+[malli](https://github.com/metosin/malli), [reitit](https://github.com/metosin/reitit), among others.
 
 HappyAPI handles an OAuth2 authentication flow, described in further detail below, entirely through
 middleware. When the library user makes an API request, it will authenticate (or refresh an existing
@@ -40,14 +37,11 @@ that its middleware stack is guaranteed to either return an authentication token
 will block on the code exchange until it gets called back.
 
 When I tried using this library in a Web application, though, I found that it was hard to keep the
-appealing simplicity of the original. 
+appealing simplicity of the original.
 
-I hoped to find a better solution in the [async][ring-async] arity of the middleware functions. What
-this a case of selecting the right function "[color][what-color]", and making everything
+I hoped to find a better solution in the [async](https://github.com/ring-clojure/ring/blob/master/SPEC.md) arity of the middleware functions. What
+this a case of selecting the right function "[color](https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/)", and making everything
 asynchronous?
-
-[ring-async]: https://github.com/ring-clojure/ring/blob/master/SPEC.md
-[what-color]: https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/
 
 I was quickly disabused of this notion when I considered realistic user behavior: we have to wait for
 the user to authenticate outside our application, and when they return pick up where we left off.
@@ -59,7 +53,8 @@ it won't work.
 Both sync and async auth have a problem. Looks like auth comes in a few more "colors"! Before we
 describe them, let's look at the tried and tested way of solving this.
 
-## The Durable Workflow Pattern
+
+## The Durable Workflow Pattern {#the-durable-workflow-pattern}
 
 In a robust Web service we have to deal with storing state. This state consists of models of our
 application domain - things like users, posts, comments, whatever - and some state that is there
@@ -68,7 +63,7 @@ models", and the latter "workflow state".
 
 For user authentication, we might define:
 
-![auth-request](erd.png)
+{{< figure src="erd.png" alt="auth-request" >}}
 
 We create an `auth-request` when the user starts the authentication process, and an `auth` when the
 user redirects back. If the user doesn't come back after a few minutes, perhaps we have some cleanup
@@ -85,7 +80,7 @@ together with the supporting state, make up the authentication workflow.
 This is a "durable workflow" pattern: a combination of functions and persistence. Persistence is
 there to keep track of intermediate steps that compose the overall workflow.
 
-In this post, we will implement a durable authentication workflow with [Temporal][temporal], which
+In this post, we will implement a durable authentication workflow with [Temporal](https://temporal.io), which
 handles workflow state and behavior conveniently.
 
 In the large, Temporal is a workflow orchestration tool for orchestrating work in complex
@@ -93,16 +88,15 @@ microservice architectures. In the small, it lets you write durable workflows as
 can block without tying up a thread, and which can be started in one process and completed in
 another.
 
-[temporal]: https://temporal.io
-
 Although this is example is simple, it shows how we can implement applications that have resources
 with long-running setup, potentially involving other systems or people in the loop.
 
-## Auth colors
 
-So what are authentication's "[colors][what-color]"?
+## Auth colors {#auth-colors}
 
-![colors](colors.png)
+So what are authentication's "[colors](https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/)"?
+
+{{< figure src="colors.png" alt="colors" >}}
 
 The sync variant (blue) is simplest to use and appropriate for applications where we can afford to
 block. The async variant (red) is best for large response payloads, where we may want to have lots of requests
@@ -110,18 +104,17 @@ going on at the same time. (This is tricky anyway because of rate limiting.)
 
 And we have a brand new color: green, for durable workflow authentication :)
 
-## OAuth2 workflow
 
-The steps in the Oauth2 [authorization code grant][auth-code] involves a resource server, an
+## OAuth2 workflow {#oauth2-workflow}
+
+The steps in the Oauth2 [authorization code grant](https://datatracker.ietf.org/doc/html/rfc6749#section-1.3.1) involves a resource server, an
 authorization server, and a client application, as shown in the image below.
 
-![auth-seq](authcode.webp)
-
-[auth-code]: https://datatracker.ietf.org/doc/html/rfc6749#section-1.3.1
+{{< figure src="authcode.webp" alt="auth-seq" >}}
 
 When a user tries to access a protected resource, they are redirected to a login page. This login
 link contains a "state" parameter, later validated by the client when the user is redirected back
-with an authorization code. 
+with an authorization code.
 
 If the state parameter is OK, the client exchanges the auth code for an access token and refresh
 token. Access tokens are valid for a short time period - for Google, it's an hour - and can be
@@ -132,12 +125,13 @@ Web application store access tokens and refresh tokens in the database in an enc
 a password. On every request to a protected resource, the client checks if the access token is still
 valid, and refreshes it otherwise.
 
-## Objective
+
+## Objective {#objective}
 
 we want to create an application that allows the user to log in to Google with enough access scope
-to show the contents of a Google Sheet on screen. 
+to show the contents of a Google Sheet on screen.
 
-![Basic flow](basic-flow.png)
+{{< figure src="basic-flow.png" alt="Basic flow" >}}
 
 If the user is unauthenticated, they should see a "Sign in with Google" button. Once redirected
 back, they should see a login link. When they click on this link, they should see the contents of
@@ -150,40 +144,27 @@ In keeping with the simplicity idea, we would like to avoid creating database sc
 short-lived state management - in other words, avoid having models like `auth-request`, which are
 not part of the application's functionality.
 
-The basic pattern I have been exploring recently is similar to the one used by [yum brands][yum]:
+The basic pattern I have been exploring recently is similar to the one used by [yum brands](https://www.youtube.com/watch?v=PcUWphfLyMA):
 use the database for models that are significant to the application, keep workflow state in
 Temporal.
 
-[yum]: https://www.youtube.com/watch?v=PcUWphfLyMA
-
 Oh and we want the app process to be observable.
 
-## Setup
 
-You can find the [code][code] here.
+## Setup {#setup}
 
-[code]: https://github.com/kpassapk/happyapi-temporal
+You can find the [code](https://github.com/kpassapk/happyapi-temporal) here.
 
-The first step is to create a [client][setup] in Google Cloud, and set the redirect URL to
+The first step is to create a [client](https://console.cloud.google.com/apis/credentials) in Google Cloud, and set the redirect URL to
 `http://localhost:8080/redirect`, retaining the client ID and secret.
 
-[setup]: https://console.cloud.google.com/apis/credentials
-
-In [deps.edn][deps], we use HappyAPI v0.1.3 and the [unifica/temporal][unifica-temporal] library,
-which uses the Manetu [Clojure SDK][manetu] and adds some convenience functions that make it easier
-to use with [Biff][biff]. The remaining dependencies are out of the box.
-
-[unifica-temporal]: https://github.com/unifica-ai/components/tree/main/temporal
-[manetu]: https://github.com/manetu/temporal-clojure-sdk
-[deps]: https://github.com/kpassapk/happyapi-temporal/blob/main/deps.edn
-[biff]: https://biffweb.com
+In [deps.edn](https://github.com/kpassapk/happyapi-temporal/blob/main/deps.edn), we use HappyAPI v0.1.3 and the [unifica/temporal](https://github.com/unifica-ai/components/tree/main/temporal) library,
+which uses the Manetu [Clojure SDK](https://github.com/manetu/temporal-clojure-sdk) and adds some convenience functions that make it easier
+to use with [Biff](https://biffweb.com). The remaining dependencies are out of the box.
 
 In `resources/config.edn`, we configure the HTTP client and JSON library to the ones used by Biff.
-([Clj-HTTP][clj-http] / [Cheshire][cheshire]). This configurability is one of the innovative things
+([Clj-HTTP](https://github.com/dakrone/clj-http) / [Cheshire](https://github.com/dakrone/cheshire)). This configurability is one of the innovative things
 about HappyAPI.
-
-[clj-http]: https://github.com/dakrone/clj-http
-[cheshire]: https://github.com/dakrone/cheshire
 
 ```clojure
 {
@@ -214,7 +195,7 @@ We load and validate this configuration on application startup using HappyAPI's 
 The spreadsheet ID is in an environment variable called `GSHEETS_SHEET_ID`.
 
 ```clojure
- :gsheets/spreadsheet-id #biff/env "GSHEETS_SHEET_ID"
+:gsheets/spreadsheet-id #biff/env "GSHEETS_SHEET_ID"
 ```
 
 Our application will create an `auth` with an access token. Here is the malli schema:
@@ -233,7 +214,8 @@ Our application will create an `auth` with an access token. Here is the malli sc
 	   [:auth/expires_at    inst?]]}
 ```
 
-## Handlers
+
+## Handlers {#handlers}
 
 The home page displays a link to a spreadsheet if we are authenticated, and allows us to start an
 authentication otherwise.
@@ -252,11 +234,9 @@ authentication otherwise.
         [:a.link {:href "/start"} "Start authentication"])])))
 ```
 
-The `start-auth` function is initiates an authentication process. It uses the [spreadsheets-get][spreadsheets-get]
+The `start-auth` function is initiates an authentication process. It uses the [spreadsheets-get](https://github.com/timothypratley/happyapi.google/blob/main/src/happyapi/google/sheets_v4.clj)
 function from the happyapi-google library, which returns request data that can later be provided to
 a wrapped HTTP client. We are requesting the scopes necessary to get a single spreadsheet.
-
-[spreadsheets-get]: https://github.com/timothypratley/happyapi.google/blob/main/src/happyapi/google/sheets_v4.clj
 
 We call `auth/start` to obtain a login link given a user ID, provider and scope list, getting back a
 login URL. This URL should in theory be valid only for a minutes.
@@ -296,7 +276,8 @@ The `finish-auth` handler gets code and state strings from query params and pass
 Next we will look at the implementation of `auth/start` and `auth/finish`, which both tie into a
 single Temporal authentication workflow.
 
-## Authentication workflow
+
+## Authentication workflow {#authentication-workflow}
 
 The `auth/start` function checks parameters passed in by the user and starts the authentication
 workflow.
@@ -309,7 +290,7 @@ workflow.
       (do
         (workflow/start ctx authentication {:id id :params params})
         {:login-url (get-link ctx params)}))
-    (throw+ 
+    (throw+
      {:type ::invalid-params
       :cause (u/explain ctx ::create params)})))
 ```
@@ -336,10 +317,7 @@ powerful: a long-running workflow (function) can be started by one process and t
 another, perhaps on a different machine.
 
 The rule is that a workflow with a given ID is only runs once at a time. If that workflow is
-stopped - in our example, it stops while waiting for an auth code - it can be restarted by [sending
-a signal to it][signal-with-start].
-
-[signal-with-start]: https://www.restack.io/docs/temporal-knowledge-temporal-io-wait-for-signal-guide
+stopped - in our example, it stops while waiting for an auth code - it can be restarted by [sending a signal to it](https://www.restack.io/docs/temporal-knowledge-temporal-io-wait-for-signal-guide).
 
 We create a random UUID to start the workflow, and then get the same ID back from Google as the
 state parameter. We will see this later in the UI later.
@@ -387,55 +365,56 @@ state changes and the results of previously run activities.
 It is important to understand the way Temporal works, becuase it constrains the way workflows are
 built and versioned. Once you get it, it starts being kind of second nature.
 
-## Let's get our auth on
+
+## Let's get our auth on {#let-s-get-our-auth-on}
 
 To see it working, we start Temporal and the application
 
-```
+```text
 temporal server start-dev
 clj -M:dev dev
 ```
 
 When we navigate to the application, we see the start page
 
-![01-start](01-start.png)
+{{< figure src="01-start.png" alt="01-start" >}}
 
 The Temporal server at `localhost:8233` has no running workflows.
 
-![03-no-workflows](03-no-workflows.png)
+{{< figure src="03-no-workflows.png" alt="03-no-workflows" >}}
 
 When we click "start authentication", we see the login link.
 
-![02-login](02-login.png)
+{{< figure src="02-login.png" alt="02-login" >}}
 
 One workflow is running!
 
-![04-one-workflow](04-one-workflow.png)
+{{< figure src="04-one-workflow.png" alt="04-one-workflow" >}}
 
 Clicking on the link takes us to Google, where we can choose the account...
 
-![05-choose-account](05-choose-account.png)
+{{< figure src="05-choose-account.png" alt="05-choose-account" >}}
 
 Add permissions...
 
-![06-permissions](06-permissions.png)
+{{< figure src="06-permissions.png" alt="06-permissions" >}}
 
 Now we have credentials stored in the database, and we can see the "Show spreadsheet" link.
 
-![07-show-spreadsheet](07-show-spreadsheet.png)
+{{< figure src="07-show-spreadsheet.png" alt="07-show-spreadsheet" >}}
 
 With these credentials, we can show the contents of the spreadsheet as JSON. Sheet unlocked!
 
-![08-spreadsheet-json](08-spreadsheet-json.png)
+{{< figure src="08-spreadsheet-json.png" alt="08-spreadsheet-json" >}}
 
 The corresponding workflow is now finished. We will click on it.
 
-![09-completed](09-completed.png)
+{{< figure src="09-completed.png" alt="09-completed" >}}
 
 The timeline view shows the time the link was active, the callback signal, and then the
 `exchange-code` and `persist-auth` activities.
 
-![10-timeline](10-timeline.png)
+{{< figure src="10-timeline.png" alt="10-timeline" >}}
 
 Below the timeline there is an Event History section. It shows a sequence of events which compose
 the workflow execution. `WorkflowExecutionStarted`, `WorkflowExecutionCompleted`, and
@@ -444,7 +423,7 @@ the workflow execution. `WorkflowExecutionStarted`, `WorkflowExecutionCompleted`
 Similarly, `ActivityTaskScheduled` and `ActivityTaskCompleted` record arguments passed into and out
 of any activities that the workflow calls.
 
-![10-event-history](10-event-history.png)
+{{< figure src="10-event-history.png" alt="10-event-history" >}}
 
 In our example, the first few events were replayed twice: once when we started the workflow, and
 once when we continued it. The UI does not have any way to indicate which events were run many
@@ -452,28 +431,25 @@ times; it's supposed to be an internal detail.
 
 Let's look at the `WorkflowExecutionCompleted` event to see workflow output:
 
-![11-nippy](11-nippy.png)
+{{< figure src="11-nippy.png" alt="11-nippy" >}}
 
-We can't see anything! The result shown here is base64-encoded, [nippy-encoded][nippy] edn data.
-
-[nippy]: https://github.com/taoensso/nippy
+We can't see anything! The result shown here is base64-encoded, [nippy-encoded](https://github.com/taoensso/nippy) edn data.
 
 Temporal can issue a CORS request to a "codec server" to decode this for display. I wrote a simple
-[codec server][codec] ring handler which `thaw`s the payload data and sends the result over the wire.
+[codec server](https://github.com/unifica-ai/components/blob/main/temporal/src/unifica/temporal/codec_server.clj) ring handler which `thaw`​s the payload data and sends the result over the wire.
 
-[codec]: https://github.com/unifica-ai/components/blob/main/temporal/src/unifica/temporal/codec_server.clj
-
-![12-codec-server](12-codec-server.png)
+{{< figure src="12-codec-server.png" alt="12-codec-server" >}}
 
 Once selected, the browser will fire off `OPTIONS` and `POST /codec/decode` requests. The decoded version shows the contents of the `wf-state` atom, which we returned from the workflow.
 
-![13-decoded](13-decoded.png)
+{{< figure src="13-decoded.png" alt="13-decoded" >}}
 
-## What we did
 
-1. Started a workflow -> created a state UUID -> created a link
-2. Clicked on the link and got redirected back
-3. Checked the state UUID, got an access token, and persisted it to the DB.
+## What we did {#what-we-did}
+
+1.  Started a workflow -&gt; created a state UUID -&gt; created a link
+2.  Clicked on the link and got redirected back
+3.  Checked the state UUID, got an access token, and persisted it to the DB.
 
 We got some of the simplicity of the original implementation back. The `defworkflow` is guaranteed
 to return either an access token or an error. But it also scales well and we can deploy many
@@ -482,11 +458,12 @@ instances of our application behind a load balancer without worry.
 It was pretty easy to track using the UI, and even introspect state at various points during
 the workflow.
 
-## Caveats
+
+## Caveats {#caveats}
 
 Clojure stack traces are long, and Temporal re-runs workflows fast and often, so it's doubly hard to
 find out what's going on from looking at the logs. The Temporal UI helps a lot here. In practice,
-I'm looking more at the UI and less at the logs. 
+I'm looking more at the UI and less at the logs.
 
 In some cases stack traces are exceeding the maximum size allowable by Temporal, which is something
 I need to look into more.
@@ -499,7 +476,8 @@ On the flip side, the retries provided by Temporal can make the REPL experience 
 if I define a var for debugging, it will get a value from one of the retries right away. I don't
 have to leave the editor.
 
-## Conclusions
+
+## Conclusions {#conclusions}
 
 "Green" durable workflows are useful not only for authentication, but for lots of other applications
 that involve non-trivial processes that involve many systems and manual steps.
@@ -507,15 +485,9 @@ that involve non-trivial processes that involve many systems and manual steps.
 Low-code tools like Make and n8n are popular at least partly because writing these kinds of systems
 tends to be hard and error-prone. It is easy to lose clarity in the process that is being modeled.
 
-At [Unifica][unifica], we are using Temporal heavily to connect APIs in valuable business workflows.
+At [Unifica](https://unifica.ai), we are using Temporal heavily to connect APIs in valuable business workflows.
 We prefer code-based solutions to low-code, since they are more powerful, scale better to more
 complex scenarios, and are more easy to test.
 
-[unifica]: https://unifica.ai
-
 Get in touch if you have a complex integration challenge and you think Temporal / Clojure might be a
 good fit.
-
-<!-- Local Variables: -->
-<!-- jinx-local-words: "happyapi" -->
-<!-- End: -->

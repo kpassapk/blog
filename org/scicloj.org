@@ -1,0 +1,12 @@
+#+TITLE: Scicloj Real World Data
+#+DATE: 2024-10-15
+#+HUGO_DRAFT: false
+
+Here is a recent recording from the [[https://scicloj.github.io][scicloj]] [[https://scicloj.github.io/docs/community/groups/real-world-data][Real World Data]] group about my
+last [[https://www.kpassa.me/posts/happyapi-temporal][post]].
+
+#+begin_export html
+{{< youtube mmOh5fYkX7Q >}}
+#+end_export
+
+Thanks to Daniel Slutsky (@daslu) for gettting the grup together and for for this recording!
